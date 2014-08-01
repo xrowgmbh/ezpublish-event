@@ -1,0 +1,22 @@
+.labelstartdate, .labelstarttime, .labelweekday {
+    float: left;
+}
+.ezpevent_remove_period, .ezpevent_remove_exclude_period {
+    float: right;
+}
+.labelstarttime {
+    margin-right: 15px;
+}
+.labelendtime {
+    float: left;
+}
+.weekdaysheader {
+    clear: both;
+    margin: 20px 0 5px 0;
+}
+.ezpeventhr {
+    margin: 20px 0 10px 0;
+}
+.weekdays {
+    display: none;
+}
