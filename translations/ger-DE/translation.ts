@@ -46,6 +46,10 @@
         <translation>Freitag</translation>
     </message>
     <message>
+        <source>Saturday</source>
+        <translation>Samstag</translation>
+    </message>
+    <message>
         <source>Exclude periods</source>
         <translation>Zeiträume ausschließen</translation>
     </message>
@@ -62,23 +66,31 @@
         <translation>Datum wählen</translation>
     </message>
     <message>
-        <source>select a start date.</source>
+        <source>Select a start date.</source>
         <translation>Bitte wählen Sie ein Startdatum.</translation>
     </message>
     <message>
-        <source>set a start time.</source>
+        <source>Set a start time.</source>
         <translation>Bitte setzen Sie eine Startzeit.</translation>
     </message>
+        <message>
+        <source>Select an end date.</source>
+        <translation>Bitte wählen Sie ein Enddatum.</translation>
+    </message>
     <message>
-        <source>select an end time newer then the start time.</source>
+        <source>Select an end time newer then the start time.</source>
         <translation>Bitte wählen Sie ein Enddatum, welches nach dem Startdatum ist.</translation>
     </message>
     <message>
-        <source>select a start date in the future.</source>
+        <source>Select a start date in the future.</source>
         <translation>Bitte wählen Sie ein Startdatum, welches in der Zukunft liegt.</translation>
     </message>
     <message>
-        <source>select a end date in the future.</source>
+        <source>Maximum period of an event is one year.</source>
+        <translation>Die maximale Dauer einer Veranstaltung ist ein Jahr.</translation>
+    </message>
+    <message>
+        <source>Select a end date in the future.</source>
         <translation>Bitte wählen Sie ein Enddatum, welches in der Zukunft liegt.</translation>
     </message>
 </context>
