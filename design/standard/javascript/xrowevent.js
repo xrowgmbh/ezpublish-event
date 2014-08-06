@@ -1,8 +1,26 @@
 var divIDPrefix = 'ezpeventperiod',
     divExcludeIDPrefix = 'ezpeventexcludeperiod',
-    counter = {include: 0,
-               exclude: 0};;
+    ezpeCounter = {include: 1,
+                   exclude: 1},
+    ezpeIndexCounter = 0;
 jQuery(document).ready(function() {
+    $('.ezpevent').each(function(){
+        if(typeof $(this).data('attrid') !== 'undefined') {
+            var attrid = $(this).data('attrid');
+            if(typeof $('#counterInclude'+attrid) !== 'undefined' && parseInt($('#counterInclude'+attrid).data('counter')) > 1)
+                ezpeCounter['include'] = $('#counterInclude'+attrid).data('counter');
+            if(typeof $('#counterExclude'+attrid) !== 'undefined' && parseInt($('#counterExclude'+attrid).data('counter')) > 1)
+                ezpeCounter['exclude'] = $('#counterExclude'+attrid).data('counter');
+        }
+        if(typeof $(this).data('locale') !== 'undefined') {
+            var datePickerLocale = $(this).data('locale'),
+                datePickerName = '.ezpublisheventdate';
+            $.datepicker.setDefaults(datePickerLocale);
+            $(datePickerName).each(function(){
+                initDate($(this));
+            });
+        }
+    });
     // add new include period
     $('.ezpevent_add_period').each(function(){
         $(this).on( 'click', function(event){
@@ -14,8 +32,7 @@ jQuery(document).ready(function() {
         $(this).on( 'click', function(event){
             event.preventDefault();
             if(typeof $(this).data('index') !== 'undefined') {
-                counter['include']++;
-                removePeriod($(this), divIDPrefix, 'include', $('.ezpevent_add_period'));
+                removePeriod($(this), divIDPrefix, 'include', $('.ezpevent_add_period'), 'ezpevent_remove_period');
             }
         });
     });
@@ -30,33 +47,34 @@ jQuery(document).ready(function() {
         $(this).on( 'click', function(event){
             event.preventDefault();
             if(typeof $(this).data('index') !== 'undefined') {
-                counter['exclude']++;
-                removePeriod($(this), divIDPrefix, 'exclude', $('.ezpevent_add_exclude_period'));
+                removePeriod($(this), divExcludeIDPrefix, 'exclude', $('.ezpevent_add_exclude_period'), 'ezpevent_remove_exclude_period');
             }
         });
-    });
-    var datePickerName = '.ezpublisheventdate',
-        datePickerLocale = $('.ezpeventdate_data_locale').val();
-    $.datepicker.setDefaults(datePickerLocale);
-    $(datePickerName).each(function(){
-        initDate($(this));
     });
 });
 var initDate = function(element) {
     element.datepicker({
         onClose: function (dateText, inst) {
+            if(typeof $(this).data('setdatefor') !== 'undefined') {
+                var setDateForID = $(this).data('setdatefor');
+                if(dateText != '' && $('#'+setDateForID).val() == '') {
+                    $('#'+setDateForID).val(dateText);
+                }
+            }
             if(typeof $(this).data('index') !== 'undefined') {
                 if($.trim($(this).val()) == '')
                     $('#ezpeventperiodweekdays_'+$(this).data('index')).hide();
-                var startDateVal = $('#startdate_'+$(this).data('index')).val(),
-                    startDate = parseDate(startDateVal),
-                    endDate = parseDate(dateText);
-                var days = (endDate-startDate)/86400000;
-                if(days >= 3) {
-                    $('#ezpeventperiodweekdays_'+$(this).data('index')).show();
-                }
-                if(days < 3) {
-                    $('#ezpeventperiodweekdays_'+$(this).data('index')).hide();
+                if($('#startdate_'+$(this).data('index')).length) {
+                    var startDateVal = $('#startdate_'+$(this).data('index')).val(),
+                        startDate = parseDate(startDateVal),
+                        endDate = parseDate(dateText);
+                    var days = (endDate-startDate)/86400000;
+                    if(days >= 3) {
+                        $('#ezpeventperiodweekdays_'+$(this).data('index')).show();
+                    }
+                    if(days < 3) {
+                        $('#ezpeventperiodweekdays_'+$(this).data('index')).hide();
+                    }
                 }
             }
         },
@@ -78,46 +96,80 @@ var parseDate = function(date) {
         return date;
     }
     else {
-        window.console.log('Your date format is not set in xrowevent.js');
+        //window.console.log('Your date format is not set in xrowevent.js');
         return false;
     }
 };
-var appendPeriod = function(element, divIDPrefix, findPrefix, removeButtonID) {
-    var index = element.data('index');
-    counter[findPrefix]++;
-    if(index > counter[findPrefix])
-        counter[findPrefix] = index;
-    var content = $('#'+divIDPrefix+'_'+index).html(),
-        new_index = counter[findPrefix];
-    content = replaceIndex(content, findPrefix, element, index, new_index);
-    // add new node after this
-    $('<div id='+divIDPrefix+'_'+new_index+'><hr class="ezpeventhr" />'+content+'</div>').insertAfter('#'+divIDPrefix+'_'+(new_index-1));
+var appendPeriod = function(element, div, findPrefix, removeButtonID) {
+    var index = element.data('index'),
+        new_index = ezpeCounter[findPrefix];
+    if(ezpeCounter[findPrefix] == 1)
+        index = 0;
+    window.console.log('appendPeriod index '+index+' new_index '+new_index);
+    if(typeof $('#'+div+'_'+index) !== 'undefined' && $('#'+div+'_'+index).length) {
+        var content = $('#'+div+'_'+index).html(),
+            new_index = ezpeCounter[findPrefix];
+        content = replaceIndex(content, findPrefix, element, index, new_index);
+        // add new node after this
+        var newHTML = '<div id='+div+'_'+new_index+'>'+content+'</div>';
+        if(index == 0)
+            newHTML = '<div id='+div+'_'+new_index+'><hr class="ezpeventhr" />'+content+'</div>';
+        $(newHTML).insertAfter('#'+div+'_'+(new_index-1));
+        initializeDefault(new_index, findPrefix, element, div, removeButtonID);
+        ezpeCounter[findPrefix]++;
+        //window.console.log('initializeDefault appendPeriod Index '+new_index);
+    }
+};
+var removePeriod = function(element, div, findPrefix, addButton, removeButtonID) {
+    var index = element.data('index'),
+        next_index = index+1,
+        allDivsCounter = ezpeCounter[findPrefix];
+    $('#'+div+'_'+index).remove();
+    ezpeCounter[findPrefix]--;
+    window.console.log('1. initializeDefault removePeriod Index '+next_index+' counter '+ezpeCounter[findPrefix]);
+    addButton.attr('data-index', ezpeCounter[findPrefix]);
+    ezpeIndexCounter = ezpeCounter[findPrefix];
+    if(typeof $('#'+div+'_'+next_index) !== 'undefined' && $('#'+div+'_'+next_index).length) {
+        for ( i = next_index; i <= allDivsCounter ; i++ ) {
+            if(typeof $('#'+div+'_'+i) !== 'undefined' && $('#'+div+'_'+i).length) {
+                var content = $('#'+div+'_'+i).html();
+                content = replaceIndex(content, findPrefix, element, i, (i-1));
+                if(content) {
+                    $('#'+div+'_'+i).remove();
+                    $('<div id='+div+'_'+(i-1)+'>'+content+'</div>').insertAfter('#'+div+'_'+(i-2));
+                    initializeDefault((i-1), findPrefix, addButton, div, removeButtonID);
+                    window.console.log('initializeDefault removePeriod Index '+(i-1));
+                    var lastCounter = i-1;
+                }
+            }
+        }
+        if(typeof lastCounter !== 'undefined') {
+            window.console.log('lastCounter '+lastCounter);
+            addButton.attr('data-index', lastCounter);
+            ezpeIndexCounter = lastCounter;
+            ezpeCounter[findPrefix] = lastCounter+1;
+        }
+    }
+    else if(ezpeCounter[findPrefix] == 1) {
+        window.console.log('last Counter '+0);
+        addButton.attr('data-index', 0);
+        ezpeIndexCounter = 0;
+    }
+};
+var initializeDefault = function(index, findPrefix, element, div, removeButtonID) {
+    if(findPrefix == 'include')
+        activeAllCheckboxes(index);
     // initilize datepicker
-    $('#'+divIDPrefix+'_'+new_index+' .ezpublisheventdate').each(function(){
+    $('#'+div+'_'+index+' .ezpublisheventdate').each(function(){
         initDate($(this));
     });
     // set event for remove selected include period
-    $('#'+removeButtonID+'_'+new_index).show();
-    $('#'+removeButtonID+'_'+new_index).on( 'click', function(event){
+    $('#'+removeButtonID+'_'+index).show();
+    window.console.log('removeButtonID: #'+removeButtonID+'_'+index);
+    $('#'+removeButtonID+'_'+index).on( 'click', function(event){
         event.preventDefault();
-        removePeriod($(this), divIDPrefix, findPrefix, element);
+        removePeriod($(this), div, findPrefix, element, removeButtonID);
     });
-};
-var removePeriod = function(element, divIDPrefix, findPrefix, addButton) {
-    var index = element.data('index');
-    $('#'+divIDPrefix+'_'+index).remove();
-    var allDivsCounter = counter[findPrefix];
-    counter[findPrefix]--;
-    addButton.attr('data-index', counter[findPrefix]);
-    if(typeof $('#'+divIDPrefix+'_'+allDivsCounter) !== 'undefined' && index < allDivsCounter) {
-        for ( i=index; i <= allDivsCounter ; i++ ) {
-            var content = $('#'+divIDPrefix+'_'+i).html(),
-                oldCounter = i+1;
-            content = replaceIndex(content, findPrefix, element, oldCounter, i);
-            $('#'+divIDPrefix+'_'+i).remove();
-            $(content).insertAfter('#'+divIDPrefix+'_'+(i-1));
-        }
-    }
 };
 var replaceIndex = function(content, findPrefix, element, index, new_index) {
     var findArray = {0: findPrefix+'\\]\\['+index,
@@ -130,12 +182,24 @@ var replaceIndex = function(content, findPrefix, element, index, new_index) {
             2: 'data-index="'+new_index+'"',
             3: '',
             4: 'value=""'};
-    element.attr('data-index', new_index);
-    for (key in findArray) {
-        var regex = new RegExp(findArray[key], 'g'),
-        content = content.replace(regex, replaceArray[key]);
+    if(typeof content !== 'undefined') {
+        for (key in findArray) {
+            var regex = new RegExp(findArray[key], 'g'),
+            content = content.replace(regex, replaceArray[key]);
+        }
+        element.attr('data-index', new_index);
+        ezpeIndexCounter = new_index;
+        return content;
     }
-    return content;
+    return '';
+};
+var activeAllCheckboxes = function(index) {
+    $('#ezpeventperiodweekdays_'+index).hide();
+    $('#ezpeventperiodweekdays_'+index+' input:checkbox').each(function(){
+        if($(this).is(':checked') === false) {
+            $(this).attr('checked', 'checked');
+        }
+    });
 };
 function strpos (haystack, needle, offset) {
     var i = (haystack + '').indexOf(needle, (offset || 0));
