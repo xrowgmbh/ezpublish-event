@@ -148,9 +148,9 @@ class eZPublishEventType extends eZDataType
                                     }
                                 }
                             }
-                            else
+                            elseif( isset( $excludeItem['startdate'] ) && trim( $excludeItem['startdate'] ) != '' && isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) == '' )
                             {
-                                $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'select an end date.' );
+                                $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'Select an end date.' );
                             }
                             if( isset( $validate['error'] ) )
                             {
@@ -212,7 +212,7 @@ class eZPublishEventType extends eZDataType
     {
         $locale = $contentObjectAttribute->LanguageCode;
         $contentTmp = json_decode( $contentObjectAttribute->attribute( 'data_text' ) );
-        $content = array();
+        $content = array( 'json' => array() );
         $ezpe_ini = eZINI::instance( 'ezpublishevent.ini' );
         $dateFormatArray = $ezpe_ini->variable( 'Settings', 'DateFormat' );
         if( isset( $dateFormatArray[$locale] ) )
@@ -245,6 +245,16 @@ class eZPublishEventType extends eZDataType
                     {
                         $include[$key]['weekdays'] = $contentIncludeItem->weekdays;
                     }
+                    // get the first start date and the last end date of all periods
+                    if( !isset( $firststartdate ) )
+                    {
+                        $firststartdate =  $starttimestamp;
+                    }
+                    if( count( $contentTmp->include ) == ($key+1) )
+                    {
+                        $lastenddate =  $endtimestamp;
+                    }
+                    // set the days for show/hide weekdays
                     $http = eZHTTPTool::instance();
                     $getDaysStarttime = clone $startdate;
                     $getDaysStarttime->setTime( 00, 00 );
@@ -270,11 +280,19 @@ class eZPublishEventType extends eZDataType
             }
             if( isset( $include ) && count( $include ) > 0 )
             {
-                $content['include'] = $include;
+                $content['json']['include'] = $include;
             }
             if( isset( $exclude ) && count( $exclude ) > 0 )
             {
-                $content['exclude'] = $exclude;
+                $content['json']['exclude'] = $exclude;
+            }
+            if( isset( $firststartdate ) )
+            {
+                $content['perioddetails']['firststartdate'] = $firststartdate;
+            }
+            if( isset( $lastenddate ) )
+            {
+                $content['perioddetails']['lastenddate'] = $lastenddate;
             }
         }
         return $content;

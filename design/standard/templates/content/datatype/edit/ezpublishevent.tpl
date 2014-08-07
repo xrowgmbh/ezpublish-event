@@ -15,17 +15,20 @@
 {/if}
 {if $attribute.has_content}
     {def $content = $attribute.content}
-    {if is_set( $content.include )}
-        {def $attrInclude = $content.include}
+    {if is_set( $content.json.include )}
+        {def $attrInclude = $content.json.include}
     {/if}
-    {if is_set( $content.exclude )}
-        {def $attrExclude = $content.exclude}
+    {if is_set( $content.json.exclude )}
+        {def $attrExclude = $content.json.exclude}
     {/if}
 {/if}
 {ezcss_require(array('jquery-ui.css', 'xrowevent.css'))}
 {ezscript_require(array('ezjsc::jqueryUI', 'xrowevent.js'))}
 <input type="hidden" class="ezpevent" id="ezpevent{$attribute.id}" data-attrid="{$attribute.id}" data-locale="{$locale.http_locale_code|extract(0,2)}" />
 <input type="hidden" value="{$locale.http_locale_code|extract(0,2)}" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[locale]" class="ezpeventdate_data_locale" />
+<span style="display: none">
+    {$content.perioddetails.firststartdate|l10n( 'shortdate' )} :: {$content.perioddetails.lastenddate|l10n( 'shortdate' )}
+</span>
 <fieldset>
     <legend>{'Periods'|i18n( 'extension/ezpublish-event' )}</legend>
 {if is_set( $postInclude )}

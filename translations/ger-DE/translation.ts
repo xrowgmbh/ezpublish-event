@@ -93,5 +93,9 @@
         <source>Select a end date in the future.</source>
         <translation>Bitte wählen Sie ein Enddatum, welches in der Zukunft liegt.</translation>
     </message>
+    <message>
+        <source>Select an end date.</source>
+        <translation>Bitte wählen Sie ein Enddatum.</translation>
+    </message>
 </context>
 </TS>
