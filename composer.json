@@ -1,6 +1,6 @@
 {
     "name": "xrowgmbh/ezpublish-event-ls",
-    "description": "Event extension for eZ Publish legacy",
+    "description": "Event extension for eZ Publish",
     "type": "ezpublish-legacy-extension",
     "license": "GPL-2.0",
     "authors": [
