@@ -1,0 +1,19 @@
+{
+    "name": "xrowgmbh/ezpublish-event-ls",
+    "description": "Event extension for eZ Publish legacy",
+    "type": "ezpublish-legacy-extension",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "xrow GmbH",
+            "homepage": "http://www.xrow.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "ezsystems/ezpublish-legacy-installer": "*"
+    },
+    "extra": {
+        "ezpublish-legacy-extension-name": "ezpublish-event"
+    }
+}
