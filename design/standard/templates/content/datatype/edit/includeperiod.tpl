@@ -1,24 +1,34 @@
+{if is_set( $item.starttime )}
+{def $starttime = hash( 'startdate', $item.starttime|datetime( 'custom', $dateFormat ),
+                        'starttimeHour', $item.starttime|datetime( 'custom', '%H' ),
+                        'starttimeMinute', $item.starttime|datetime( 'custom', '%i' ) )}
+{/if}
+{if is_set( $item.endtime )}
+{def $endtime = hash( 'enddate', $item.endtime|datetime( 'custom', $dateFormat ),
+                      'endtimeHour', $item.endtime|datetime( 'custom', '%H' ),
+                      'endtimeMinute', $item.endtime|datetime( 'custom', '%i' ) )}
+{/if}
     <div id="ezpeventperiod_{$index}" class="ezpeventincludeperiod">
 {if $index|gt( 0 )}<hr class="ezpeventhr" />{/if}
         <button class="ezpevent_remove_period" id="ezpevent_remove_period_{$index}" data-index="{$index}"{if $index|eq(0)} style="display: none"{/if}>{'Remove'|i18n( 'design/admin/class/view' )}</button>
         <label for="startdate" class="labelstartdate">
             {'Start date'|i18n( 'extension/ezpublish-event' )}
-            <input class="ezpublisheventdate" id="startdate_{$index}" data-setdatefor="enddate_{$index}" value="{if is_set( $item )}{if and( is_set( $item.startdate ), $item.startdate|ne('') )}{$item.startdate}{/if}{/if}" type="text" size="40" maxlength="40" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][startdate]" placeholder="{'Choose date'|i18n( 'extension/ezpublish-event' )}" />
+            <input class="ezpublisheventdate" id="startdate_{$index}" data-setdatefor="enddate_{$index}" value="{if is_set( $starttime )}{if and( is_set( $starttime.startdate ), $starttime.startdate|ne('') )}{$starttime.startdate}{/if}{/if}" type="text" size="40" maxlength="40" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][startdate]" placeholder="{'Choose date'|i18n( 'extension/ezpublish-event' )}" />
         </label>
         <label for="enddate" class="labelenddate">
             {'End date'|i18n( 'extension/ezpublish-event' )}
-            <input class="ezpublisheventdate" id="enddate_{$index}" data-index="{$index}" value="{if is_set( $item )}{if and( is_set( $item.enddate ), $item.enddate|ne('') )}{$item.enddate}{/if}{/if}" type="text" size="40" maxlength="40" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][enddate]" placeholder="{'Choose date'|i18n( 'extension/ezpublish-event' )}" />
+            <input class="ezpublisheventdate" id="enddate_{$index}" data-index="{$index}" value="{if is_set( $endtime )}{if and( is_set( $endtime.enddate ), $endtime.enddate|ne('') )}{$endtime.enddate}{/if}{/if}" type="text" size="40" maxlength="40" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][enddate]" placeholder="{'Choose date'|i18n( 'extension/ezpublish-event' )}" />
         </label>
         <br />
         <label for="starttime-hour" class="labelstarttime">
             {'from'|i18n( 'extension/ezpublish-event' )}
-            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][starttime-hour]" value="{if is_set( $item )}{if and( is_set( $item.starttime-hour ), $item.starttime-hour|ne('') )}{$item.starttime-hour}{/if}{/if}" /> :
-            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][starttime-minute]" value="{if is_set( $item )}{if and( is_set( $item.starttime-minute ), $item.starttime-minute|ne('') )}{$item.starttime-minute}{/if}{/if}" />
+            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][starttime-hour]" value="{if is_set( $starttime )}{if and( is_set( $starttime.starttimeHour ), $starttime.starttimeHour|ne('') )}{$starttime.starttimeHour}{/if}{/if}" /> :
+            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][starttime-minute]" value="{if is_set( $starttime )}{if and( is_set( $starttime.starttimeMinute ), $starttime.starttimeMinute|ne('') )}{$starttime.starttimeMinute}{/if}{/if}" />
         </label>
         <label for="endtime-hour" class="labelendtime">
             {'to'|i18n( 'extension/ezpublish-event' )}
-            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][endtime-hour]" value="{if is_set( $item )}{if and( is_set( $item.endtime-hour ), $item.endtime-hour|ne('') )}{$item.endtime-hour}{/if}{/if}" /> : 
-            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][endtime-minute]" value="{if is_set( $item )}{if and( is_set( $item.endtime-minute ), $item.endtime-minute|ne('') )}{$item.endtime-minute}{/if}{/if}" />
+            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][endtime-hour]" value="{if is_set( $endtime )}{if and( is_set( $endtime.endtimeHour ), $endtime.endtimeHour|ne('') )}{$endtime.endtimeHour}{/if}{/if}" /> : 
+            <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][endtime-minute]" value="{if is_set( $endtime )}{if and( is_set( $endtime.endtimeMinute ), $endtime.endtimeMinute|ne('') )}{$endtime.endtimeMinute}{/if}{/if}" />
         </label><span class="ezpeventclock">{"o'clock"|i18n( "extension/ezpublish-event" )}</span>
         <div class="weekdays" id="ezpeventperiodweekdays_{$index}"{if or( and( is_set( $item ), is_set( $item.weekdays )|not() ), and( is_set( $item.weekdays ), $item.weekdays|count|gt( 0 ), $item.weekdays|count|lt( 7 ) ), is_set( $postDataDays[$index] ) )} style="display: block"{/if}>
             <div class="weekdaysheader">{'On this weekdays'|i18n( 'extension/ezpublish-event' )}:</div>
@@ -46,3 +56,5 @@
             <div style="clear: both"></div>
         </div>
     </div>
+{if is_set( $starttime )}{undef $starttime}{/if}
+{if is_set( $endtime )}{undef $endtime}{/if}

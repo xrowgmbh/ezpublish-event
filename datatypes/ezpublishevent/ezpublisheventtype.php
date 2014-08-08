@@ -30,7 +30,8 @@ class eZPublishEventType extends eZDataType
                 if( isset( $dateFormatArray[$locale] ) )
                 {
                     $data = $http->postVariable( $base . '_ezpeventdate_data_' . $contentObjectAttribute->attribute( 'id' ) );
-                    $dateFormat = $dateFormatArray[$locale] . ' ' . $timeFormatArray[$locale];
+                    $dateFormat = preg_replace( '/%/', '', $dateFormatArray[$locale] );
+                    $dateFormat = $dateFormat . ' ' . preg_replace( '/%/', '', $timeFormatArray[$locale] );
                     $data_text = array();
                     $include = array();
                     $exclude = array();
@@ -213,87 +214,77 @@ class eZPublishEventType extends eZDataType
         $locale = $contentObjectAttribute->LanguageCode;
         $contentTmp = json_decode( $contentObjectAttribute->attribute( 'data_text' ) );
         $content = array( 'json' => array() );
-        $ezpe_ini = eZINI::instance( 'ezpublishevent.ini' );
-        $dateFormatArray = $ezpe_ini->variable( 'Settings', 'DateFormat' );
-        if( isset( $dateFormatArray[$locale] ) )
+        if( isset( $contentTmp->include ) && count( $contentTmp->include ) > 0 )
         {
-            $dateFormat = $dateFormatArray[$locale];
-            if( isset( $contentTmp->include ) && count( $contentTmp->include ) > 0 )
+            $include = array();
+            foreach( $contentTmp->include as $key => $contentIncludeItem )
             {
-                $include = array();
-                foreach( $contentTmp->include as $key => $contentIncludeItem )
+                // initialize include
+                $startdate = new DateTime( $contentIncludeItem->start );
+                $starttimestamp = $startdate->getTimestamp();
+                $include[$key]['starttime'] = $starttimestamp;
+                $enddate = new DateTime( $contentIncludeItem->end );
+                $endtimestamp = $enddate->getTimestamp();
+                // check if event is only one day
+                $tmpStartdate = clone $startdate;
+                $tmpStartdate->modify( '+1 day' );
+                $tmpStartdate->setTime( 00, 00 );
+                if( $endtimestamp > $tmpStartdate->getTimestamp() )
                 {
-                    // initialize include
-                    $startdate = new DateTime( $contentIncludeItem->start );
-                    $starttimestamp = $startdate->getTimestamp();
-                    $include[$key] = array( 'startdate' => date( $dateFormat, $starttimestamp ),
-                                            'starttime-hour' => date( 'H', $starttimestamp ),
-                                            'starttime-minute' => date( 'i', $starttimestamp ) );
-                    $enddate = new DateTime( $contentIncludeItem->end );
-                    $endtimestamp = $enddate->getTimestamp();
-                    // check if event is only one day
-                    $tmpStartdate = clone $startdate;
-                    $tmpStartdate->modify( '+1 day' );
-                    $tmpStartdate->setTime( 00, 00 );
-                    if( $endtimestamp > $tmpStartdate->getTimestamp() )
-                    {
-                        $include[$key]['enddate'] = date( $dateFormat, $endtimestamp );
-                        $include[$key]['endtime-hour'] = date( 'H', $endtimestamp );
-                        $include[$key]['endtime-minute'] = date( 'i', $endtimestamp );
-                    }
-                    if( isset( $contentIncludeItem->weekdays ) )
-                    {
-                        $include[$key]['weekdays'] = $contentIncludeItem->weekdays;
-                    }
-                    // get the first start date and the last end date of all periods
-                    if( !isset( $firststartdate ) )
-                    {
-                        $firststartdate =  $starttimestamp;
-                    }
-                    if( count( $contentTmp->include ) == ($key+1) )
-                    {
-                        $lastenddate =  $endtimestamp;
-                    }
-                    // set the days for show/hide weekdays
-                    $http = eZHTTPTool::instance();
-                    $getDaysStarttime = clone $startdate;
-                    $getDaysStarttime->setTime( 00, 00 );
-                    $getDaysEndtime = clone $enddate;
-                    $getDaysEndtime->setTime( 00, 00 );
-                    $days[$key] = ( $getDaysEndtime->getTimestamp() - $getDaysStarttime->getTimestamp() ) / 86400;
-                    $http->setPostVariable( 'ContentObjectAttribute_ezpe_valid_days_' . $contentObjectAttribute->attribute( 'id' ), $days );
+                    $include[$key]['endtime'] = $endtimestamp;
                 }
-            }
-            if( isset( $contentTmp->exclude ) && count( $contentTmp->exclude ) > 0 )
-            {
-                $exclude = array();
-                foreach( $contentTmp->exclude as $key => $contentExcludeItem )
+                if( isset( $contentIncludeItem->weekdays ) )
                 {
-                    // initialize include
-                    $startdateExc = new DateTime( $contentExcludeItem->start );
-                    $starttimestamp = $startdateExc->getTimestamp();
-                    $exclude[$key] = array( 'startdate' => date( $dateFormat, $starttimestamp ) );
-                    $enddateExc = new DateTime( $contentExcludeItem->end );
-                    $endtimestamp = $enddateExc->getTimestamp();
-                    $exclude[$key]['enddate'] = date( $dateFormat, $endtimestamp );
+                    $include[$key]['weekdays'] = $contentIncludeItem->weekdays;
                 }
+                // get the first start date and the last end date of all periods
+                if( !isset( $firststartdate ) )
+                {
+                    $firststartdate =  $starttimestamp;
+                }
+                if( count( $contentTmp->include ) == ($key+1) )
+                {
+                    $lastenddate =  $endtimestamp;
+                }
+                // set the days for show/hide weekdays
+                $http = eZHTTPTool::instance();
+                $getDaysStarttime = clone $startdate;
+                $getDaysStarttime->setTime( 00, 00 );
+                $getDaysEndtime = clone $enddate;
+                $getDaysEndtime->setTime( 00, 00 );
+                $days[$key] = ( $getDaysEndtime->getTimestamp() - $getDaysStarttime->getTimestamp() ) / 86400;
+                $http->setPostVariable( 'ContentObjectAttribute_ezpe_valid_days_' . $contentObjectAttribute->attribute( 'id' ), $days );
             }
-            if( isset( $include ) && count( $include ) > 0 )
+        }
+        if( isset( $contentTmp->exclude ) && count( $contentTmp->exclude ) > 0 )
+        {
+            $exclude = array();
+            foreach( $contentTmp->exclude as $key => $contentExcludeItem )
             {
-                $content['json']['include'] = $include;
+                // initialize include
+                $startdateExc = new DateTime( $contentExcludeItem->start );
+                $starttimestamp = $startdateExc->getTimestamp();
+                $exclude[$key] = array( 'starttime' => $starttimestamp );
+                $enddateExc = new DateTime( $contentExcludeItem->end );
+                $endtimestamp = $enddateExc->getTimestamp();
+                $exclude[$key]['endtime'] = $endtimestamp;
             }
-            if( isset( $exclude ) && count( $exclude ) > 0 )
-            {
-                $content['json']['exclude'] = $exclude;
-            }
-            if( isset( $firststartdate ) )
-            {
-                $content['perioddetails']['firststartdate'] = $firststartdate;
-            }
-            if( isset( $lastenddate ) )
-            {
-                $content['perioddetails']['lastenddate'] = $lastenddate;
-            }
+        }
+        if( isset( $include ) && count( $include ) > 0 )
+        {
+            $content['json']['include'] = $include;
+        }
+        if( isset( $exclude ) && count( $exclude ) > 0 )
+        {
+            $content['json']['exclude'] = $exclude;
+        }
+        if( isset( $firststartdate ) )
+        {
+            $content['perioddetails']['firststartdate'] = $firststartdate;
+        }
+        if( isset( $lastenddate ) )
+        {
+            $content['perioddetails']['lastenddate'] = $lastenddate;
         }
         return $content;
     }

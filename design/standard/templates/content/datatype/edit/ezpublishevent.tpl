@@ -1,6 +1,10 @@
 {def $locale = fetch('content', 'locale')
      $indexInc = 0
-     $indexExc = 0}
+     $indexExc = 0
+     $dateFormatArray = ezini( 'Settings', 'DateFormat', 'ezpublishevent.ini' )
+     $dateFormat = $dateFormatArray[$locale.locale_code]
+     $timeFormatArray = ezini( 'Settings', 'TimeFormat', 'ezpublishevent.ini' )
+     $timeFormat = $timeFormatArray[$locale.locale_code]}
 {if ezhttp_hasvariable( concat( $attribute_base, '_ezpe_valid_days_', $attribute.id ), 'post' )}
      {def $postDataDays = ezhttp( concat( $attribute_base, '_ezpe_valid_days_', $attribute.id ), 'post' )}
 {/if}

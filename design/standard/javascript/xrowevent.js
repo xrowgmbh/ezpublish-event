@@ -1,8 +1,7 @@
 var divIDPrefix = 'ezpeventperiod',
     divExcludeIDPrefix = 'ezpeventexcludeperiod',
     ezpeCounter = {include: 1,
-                   exclude: 1},
-    ezpeIndexCounter = 0;
+                   exclude: 1};
 jQuery(document).ready(function() {
     $('.ezpevent').each(function(){
         if(typeof $(this).data('attrid') !== 'undefined') {
@@ -105,7 +104,7 @@ var appendPeriod = function(element, div, findPrefix, removeButtonID) {
         new_index = ezpeCounter[findPrefix];
     if(ezpeCounter[findPrefix] == 1)
         index = 0;
-    window.console.log('appendPeriod index '+index+' new_index '+new_index);
+    //window.console.log('appendPeriod index '+index+' new_index '+new_index);
     if(typeof $('#'+div+'_'+index) !== 'undefined' && $('#'+div+'_'+index).length) {
         var content = $('#'+div+'_'+index).html(),
             new_index = ezpeCounter[findPrefix];
@@ -117,7 +116,6 @@ var appendPeriod = function(element, div, findPrefix, removeButtonID) {
         $(newHTML).insertAfter('#'+div+'_'+(new_index-1));
         initializeDefault(new_index, findPrefix, element, div, removeButtonID);
         ezpeCounter[findPrefix]++;
-        //window.console.log('initializeDefault appendPeriod Index '+new_index);
     }
 };
 var removePeriod = function(element, div, findPrefix, addButton, removeButtonID) {
@@ -126,9 +124,8 @@ var removePeriod = function(element, div, findPrefix, addButton, removeButtonID)
         allDivsCounter = ezpeCounter[findPrefix];
     $('#'+div+'_'+index).remove();
     ezpeCounter[findPrefix]--;
-    window.console.log('1. initializeDefault removePeriod Index '+next_index+' counter '+ezpeCounter[findPrefix]);
+    //window.console.log('1. initializeDefault removePeriod index '+index+' next index '+next_index+' counter '+ezpeCounter[findPrefix]);
     addButton.attr('data-index', ezpeCounter[findPrefix]);
-    ezpeIndexCounter = ezpeCounter[findPrefix];
     if(typeof $('#'+div+'_'+next_index) !== 'undefined' && $('#'+div+'_'+next_index).length) {
         for ( i = next_index; i <= allDivsCounter ; i++ ) {
             if(typeof $('#'+div+'_'+i) !== 'undefined' && $('#'+div+'_'+i).length) {
@@ -138,22 +135,18 @@ var removePeriod = function(element, div, findPrefix, addButton, removeButtonID)
                     $('#'+div+'_'+i).remove();
                     $('<div id='+div+'_'+(i-1)+'>'+content+'</div>').insertAfter('#'+div+'_'+(i-2));
                     initializeDefault((i-1), findPrefix, addButton, div, removeButtonID);
-                    window.console.log('initializeDefault removePeriod Index '+(i-1));
+                    //window.console.log('initializeDefault removePeriod Index '+(i-1));
                     var lastCounter = i-1;
                 }
             }
         }
         if(typeof lastCounter !== 'undefined') {
-            window.console.log('lastCounter '+lastCounter);
             addButton.attr('data-index', lastCounter);
-            ezpeIndexCounter = lastCounter;
             ezpeCounter[findPrefix] = lastCounter+1;
         }
     }
     else if(ezpeCounter[findPrefix] == 1) {
-        window.console.log('last Counter '+0);
         addButton.attr('data-index', 0);
-        ezpeIndexCounter = 0;
     }
 };
 var initializeDefault = function(index, findPrefix, element, div, removeButtonID) {
@@ -165,7 +158,7 @@ var initializeDefault = function(index, findPrefix, element, div, removeButtonID
     });
     // set event for remove selected include period
     $('#'+removeButtonID+'_'+index).show();
-    window.console.log('removeButtonID: #'+removeButtonID+'_'+index);
+    //window.console.log('removeButtonID: #'+removeButtonID+'_'+index);
     $('#'+removeButtonID+'_'+index).on( 'click', function(event){
         event.preventDefault();
         removePeriod($(this), div, findPrefix, element, removeButtonID);
@@ -188,7 +181,6 @@ var replaceIndex = function(content, findPrefix, element, index, new_index) {
             content = content.replace(regex, replaceArray[key]);
         }
         element.attr('data-index', new_index);
-        ezpeIndexCounter = new_index;
         return content;
     }
     return '';
