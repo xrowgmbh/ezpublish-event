@@ -8,7 +8,7 @@ class eZPublishEventType extends eZDataType
 
     function eZPublishEventType()
     {
-        $this->eZDataType( self::DATA_TYPE_STRING, ezpI18n::tr( 'kernel/classes/datatypes', 'eZ Publish Event', 'Datatype name' ),
+        $this->eZDataType( self::DATA_TYPE_STRING, ezpI18n::tr( 'kernel/classes/datatypes', 'Event', 'Datatype name' ),
                            array( 'serialize_supported' => true ) );
     }
 
