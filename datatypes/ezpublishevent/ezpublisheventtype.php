@@ -77,7 +77,6 @@ class eZPublishEventType extends eZDataType
                                                                     'end' => $endtime->format( self::DATE_FORMAT ) );
                                             if( isset( $includeItem['weekdays'] ) && count( $includeItem['weekdays'] ) < 7 )
                                             {
-                                                
                                                 $include[$key]['weekdays'] = $includeItem['weekdays'];
                                             }
                                             $tmpStarttime = clone $starttime;
@@ -160,7 +159,6 @@ class eZPublishEventType extends eZDataType
                             }
                         }
                     }
-                    
                     if( isset( $include ) && count( $include ) > 0 )
                     {
                         ksort( $include );
@@ -174,7 +172,7 @@ class eZPublishEventType extends eZDataType
                     if( count( $data_array ) > 0 )
                     {
                         $jsonString = json_encode( $data_array );
-                        $http->setPostVariable( $base . '_ezpe_valid_data_' . $contentObjectAttribute->attribute( 'id' ), $jsonString );
+                        $contentObjectAttribute->setAttribute( 'data_text', $jsonString );
                     }
                 }
                 else
@@ -197,13 +195,7 @@ class eZPublishEventType extends eZDataType
     */
     function fetchObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
-        if ( $http->hasPostVariable( $base . '_ezpe_valid_data_' . $contentObjectAttribute->attribute( 'id' ) ) )
-        {
-            $jsonString =  $http->postVariable( $base . '_ezpe_valid_data_' . $contentObjectAttribute->attribute( 'id' ) );
-            $contentObjectAttribute->setAttribute( 'data_text', $jsonString );
-            return true;
-        }
-        return false;
+        return true;
     }
 
     /*!
@@ -217,6 +209,7 @@ class eZPublishEventType extends eZDataType
         if( isset( $contentTmp->include ) && count( $contentTmp->include ) > 0 )
         {
             $include = array();
+            $firststartdate = $lastenddate = 0;
             foreach( $contentTmp->include as $key => $contentIncludeItem )
             {
                 // initialize include
@@ -238,13 +231,13 @@ class eZPublishEventType extends eZDataType
                     $include[$key]['weekdays'] = $contentIncludeItem->weekdays;
                 }
                 // get the first start date and the last end date of all periods
-                if( !isset( $firststartdate ) )
+                if( $starttimestamp < $firststartdate || $firststartdate == 0 )
                 {
-                    $firststartdate =  $starttimestamp;
+                    $firststartdate = $starttimestamp;
                 }
-                if( count( $contentTmp->include ) == ($key+1) )
+                if( $endtimestamp > $lastenddate || $lastenddate == 0 )
                 {
-                    $lastenddate =  $endtimestamp;
+                    $lastenddate = $endtimestamp;
                 }
                 // set the days for show/hide weekdays
                 $http = eZHTTPTool::instance();
