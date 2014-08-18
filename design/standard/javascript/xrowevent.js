@@ -54,16 +54,10 @@ jQuery(document).ready(function() {
 var initDate = function(element) {
     element.datepicker({
         beforeShow: function() {
-            if($(this).hasClass('dateto')) {
-                var parents = $(this).parents();
-                for (key in parents) {
-                    if($(parents[key]).hasClass('ezpeventincludeperiod') || $(parents[key]).hasClass('ezpeventexcludeperiod')) {
-                        var dateFrom = $(parents[key]).find('input.datefrom');
-                        if(dateFrom.val() != '') {
-                            $(this).datepicker('option', 'minDate', dateFrom.val());
-                        }
-                        break;
-                    }
+            if(typeof $(this).data('mindate') !== 'undefined') {
+                var dateFrom = $('#'+$(this).data('mindate'));
+                if(dateFrom.val() != '') {
+                    $(this).datepicker('option', 'minDate', dateFrom.val());
                 }
             }
         },
