@@ -53,6 +53,20 @@ jQuery(document).ready(function() {
 });
 var initDate = function(element) {
     element.datepicker({
+        beforeShow: function() {
+            if($(this).hasClass('dateto')) {
+                var parents = $(this).parents();
+                for (key in parents) {
+                    if($(parents[key]).hasClass('ezpeventincludeperiod') || $(parents[key]).hasClass('ezpeventexcludeperiod')) {
+                        var dateFrom = $(parents[key]).find('input.datefrom');
+                        if(dateFrom.val() != '') {
+                            $(this).datepicker('option', 'minDate', dateFrom.val());
+                        }
+                        break;
+                    }
+                }
+            }
+        },
         onClose: function (dateText, inst) {
             if(typeof $(this).data('setdatefor') !== 'undefined') {
                 var setDateForID = $(this).data('setdatefor');
@@ -127,7 +141,7 @@ var removePeriod = function(element, div, findPrefix, addButton, removeButtonID)
     //window.console.log('1. initializeDefault removePeriod index '+index+' next index '+next_index+' counter '+ezpeCounter[findPrefix]);
     addButton.attr('data-index', ezpeCounter[findPrefix]);
     if(typeof $('#'+div+'_'+next_index) !== 'undefined' && $('#'+div+'_'+next_index).length) {
-        for ( i = next_index; i <= allDivsCounter ; i++ ) {
+        for(i = next_index; i <= allDivsCounter ; i++) {
             if(typeof $('#'+div+'_'+i) !== 'undefined' && $('#'+div+'_'+i).length) {
                 var content = $('#'+div+'_'+i).html();
                 content = replaceIndex(content, findPrefix, element, i, (i-1));
