@@ -37,7 +37,7 @@
     <legend>{'Periods'|i18n( 'extension/ezpublish-event' )}</legend>
 {if is_set( $postInclude )}
     {foreach $postInclude as $indexInc => $postIncludeItem}
-        {include uri='design:content/datatype/edit/includeperiod.tpl' index=$indexInc item=$postIncludeItem post=true()}
+        {include uri='design:content/datatype/edit/includeperiod.tpl' index=$indexInc item=$postIncludeItem}
     {/foreach}
     <input type="hidden" id="counterInclude{$attribute.id}" data-counter="{$postInclude|count()}" />
 {elseif is_set( $attrInclude )}
@@ -52,12 +52,11 @@
     <button class="ezpevent_add_period" data-index="{$indexInc}">{'Add new period'|i18n( 'extension/ezpublish-event' )}</button>
     <br />
 </fieldset>
-
 <fieldset>
     <legend>{'Exclude periods'|i18n( 'extension/ezpublish-event' )}</legend>
 {if is_set( $postExclude )}
     {foreach $postExclude as $indexExc => $postExcludeItem}
-        {include uri='design:content/datatype/edit/excludeperiod.tpl' index=$indexExc item=$postExcludeItem post=true()}
+        {include uri='design:content/datatype/edit/excludeperiod.tpl' index=$indexExc item=$postExcludeItem}
     {/foreach}
     <input type="hidden" id="counterExclude{$attribute.id}" data-counter="{$postExclude|count()}" />
 {elseif is_set( $attrExclude )}

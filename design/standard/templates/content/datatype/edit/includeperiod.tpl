@@ -8,11 +8,13 @@
                         'starttimeMinute', $item.starttime-minute )}
 {/if}
 {if is_set( $item.endtime )}
-{def $endtime = hash( 'enddate', $item.endtime|datetime( 'custom', $dateFormat ),
+{def $days = $item.endtime|sub( $item.starttime )|div( 86400 )|round()
+     $endtime = hash( 'enddate', $item.endtime|datetime( 'custom', $dateFormat ),
                       'endtimeHour', $item.endtime|datetime( 'custom', '%H' ),
                       'endtimeMinute', $item.endtime|datetime( 'custom', '%i' ) )}
 {elseif is_set( $item.enddate )}
-{def $endtime = hash( 'enddate', $item.enddate,
+{def $days = $item|ezpevent_show_weekdays( $attribute.language_code )
+     $endtime = hash( 'enddate', $item.enddate,
                       'endtimeHour', $item.endtime-hour,
                       'endtimeMinute', $item.endtime-minute )}
 {/if}
@@ -38,7 +40,7 @@
             <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][endtime-hour]" value="{if is_set( $endtime )}{if and( is_set( $endtime.endtimeHour ), $endtime.endtimeHour|ne('') )}{$endtime.endtimeHour}{/if}{/if}" /> : 
             <input type="text" size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][endtime-minute]" value="{if is_set( $endtime )}{if and( is_set( $endtime.endtimeMinute ), $endtime.endtimeMinute|ne('') )}{$endtime.endtimeMinute}{/if}{/if}" />
         </label><span class="ezpeventclock">{"o'clock"|i18n( "extension/ezpublish-event" )}</span>
-        <div class="weekdays" id="ezpeventperiodweekdays_{$index}"{if or( and( is_set( $item ), is_set( $item.weekdays )|not() ), and( is_set( $item.weekdays ), $item.weekdays|count|gt( 0 ), $item.weekdays|count|lt( 7 ) ), is_set( $postDataDays[$index] ) )} style="display: block"{/if}>
+        <div class="weekdays" id="ezpeventperiodweekdays_{$index}"{if and( is_set( $days ), $days|ge( 3 ) )} style="display: block"{/if}>
             <div class="weekdaysheader">{'On this weekdays'|i18n( 'extension/ezpublish-event' )}:</div>
             <label for="Monday" class="labelweekday">
                 <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), $item.weekdays|contains( 'Mon' ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][0]" value="Mon">{'Monday'|i18n( 'design/admin/content/translationview' )}
@@ -65,4 +67,4 @@
         </div>
     </div>
 {if is_set( $starttime )}{undef $starttime}{/if}
-{if is_set( $endtime )}{undef $endtime}{/if}
+{if is_set( $endtime )}{undef $endtime $days}{/if}

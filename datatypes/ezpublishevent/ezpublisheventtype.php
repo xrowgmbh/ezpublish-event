@@ -4,7 +4,6 @@ class eZPublishEventType extends eZDataType
 {
     const DATA_TYPE_STRING = 'ezpublishevent';
     const DEFAULT_FIELD = 'data_text';
-    const DATE_FORMAT = DateTime::ISO8601;
 
     function eZPublishEventType()
     {
@@ -18,104 +17,85 @@ class eZPublishEventType extends eZDataType
     */
     function validateObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
-        $locale = $contentObjectAttribute->LanguageCode;
-        $ezpe_ini = eZINI::instance( 'ezpublishevent.ini' );
-        if( $ezpe_ini->hasVariable( 'Settings', 'DateFormat' ) )
+        $now = time();
+        if ( $http->hasPostVariable( $base . '_ezpeventdate_data_' . $contentObjectAttribute->attribute( 'id' ) ) )
         {
-            $dateFormatArray = $ezpe_ini->variable( 'Settings', 'DateFormat' );
-            $timeFormatArray = $ezpe_ini->variable( 'Settings', 'TimeFormat' );
-            $now = time();
-            if ( $http->hasPostVariable( $base . '_ezpeventdate_data_' . $contentObjectAttribute->attribute( 'id' ) ) )
+            $data = $http->postVariable( $base . '_ezpeventdate_data_' . $contentObjectAttribute->attribute( 'id' ) );
+            $data_text = array();
+            $include = array();
+            $exclude = array();
+            $days = array();
+            // get include date
+            if( isset($data['include'] ) )
             {
-                if( isset( $dateFormatArray[$locale] ) )
+                foreach( $data['include'] as $key => $includeItem )
                 {
-                    $data = $http->postVariable( $base . '_ezpeventdate_data_' . $contentObjectAttribute->attribute( 'id' ) );
-                    $dateFormat = preg_replace( '/%/', '', $dateFormatArray[$locale] );
-                    $dateFormat = $dateFormat . ' ' . preg_replace( '/%/', '', $timeFormatArray[$locale] );
-                    $data_text = array();
-                    $include = array();
-                    $exclude = array();
-                    $days = array();
-                    // get include date
-                    if( isset($data['include'] ) )
+                    $validate = array();
+                    if( isset( $includeItem['startdate'] ) && trim( $includeItem['startdate']) != '' )
                     {
-                        foreach( $data['include'] as $key => $includeItem )
+                        if( isset( $includeItem['starttime-hour'] ) && trim( $includeItem['starttime-hour'] ) != '' )
                         {
-                            $validate = array();
-                            if( isset( $includeItem['startdate'] ) && trim( $includeItem['startdate']) != '' )
+                            $timeString = trim( $includeItem['startdate'] ) . ' ' . trim( $includeItem['starttime-hour'] );
+                            try
                             {
-                                if( isset( $includeItem['starttime-hour'] ) && trim( $includeItem['starttime-hour'] ) != '' )
+                                $starttime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'start', $contentObjectAttribute->LanguageCode );
+                                $validate = $this->validateDateTime( $now, $starttime );
+                                if( isset( $validate['state'] ) )
                                 {
-                                    $timeString = trim( $includeItem['startdate'] ) . ' ' . trim( $includeItem['starttime-hour'] );
-                                    $starttime = $this->createDateTime( $timeString, $includeItem, 'start', $dateFormat );
-                                    $validate = $this->validateDateTime( $now, $starttime );
-                                    if( isset( $validate['state'] ) )
+                                    if( isset( $includeItem['enddate'] ) && trim( $includeItem['enddate']) != '' )
                                     {
-                                        if( isset( $includeItem['enddate'] ) && trim( $includeItem['enddate']) != '' )
+                                        $timeString = trim( $includeItem['enddate'] );
+                                        if( isset( $includeItem['endtime-hour'] ) && trim( $includeItem['endtime-hour']) != '' )
                                         {
-                                            $timeString = trim( $includeItem['enddate'] );
-                                            if( isset( $includeItem['endtime-hour'] ) && trim( $includeItem['endtime-hour']) != '' )
-                                            {
-                                                $timeString .= trim( $includeItem['endtime-hour'] );
-                                            }
-                                            else
-                                            {
-                                                $timeString .= ' 00';
-                                            }
-                                            $endtime = $this->createDateTime( $timeString, $includeItem, 'end', $dateFormat );
+                                            $timeString .= trim( $includeItem['endtime-hour'] );
                                         }
                                         else
                                         {
-                                            $endtime = clone $starttime;
-                                            $endtime->modify( '+1 day' );
-                                            $endtime->setTime( 00, 00 );
+                                            $timeString .= ' 00';
                                         }
-                                        $validate = $this->validateDateTime( $now, $starttime, $endtime );
-                                        if( isset( $validate['state'] ) )
-                                        {
-                                            $include[$key] = array( 'start' => $starttime->format( self::DATE_FORMAT ),
-                                                                    'end' => $endtime->format( self::DATE_FORMAT ) );
-                                            if( isset( $includeItem['weekdays'] ) && count( $includeItem['weekdays'] ) < 7 )
-                                            {
-                                                $include[$key]['weekdays'] = $includeItem['weekdays'];
-                                            }
-                                            $tmpStarttime = clone $starttime;
-                                            $tmpStarttime->setTime( 00, 00 );
-                                            $tmpEndtime = clone $endtime;
-                                            $tmpEndtime->setTime( 00, 00 );
-                                            $days[$key] = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
-                                        }
+                                        $endtime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'end', $contentObjectAttribute->LanguageCode );
                                     }
-                                }
-                                else
-                                {
-                                    $timeString = trim( $includeItem['startdate'] ) . ' 00';
-                                    $starttime = $this->createDateTime( $timeString, $includeItem, 'start', $dateFormat );
-                                    if( isset( $includeItem['enddate'] ) && trim( $includeItem['enddate']) != '' )
+                                    else
                                     {
-                                        $timeString = trim( $includeItem['enddate'] ) . ' 00';
-                                        $endtime = $this->createDateTime( $timeString, $includeItem, 'end', $dateFormat );
+                                        $endtime = clone $starttime;
+                                        $endtime->modify( '+1 day' );
+                                        $endtime->setTime( 00, 00 );
+                                    }
+                                    $validate = $this->validateDateTime( $now, $starttime, $endtime );
+                                    if( isset( $validate['state'] ) )
+                                    {
+                                        $include[$key] = array( 'start' => $starttime->format( eZPublishEvent::DATE_FORMAT ),
+                                                                'end' => $endtime->format( eZPublishEvent::DATE_FORMAT ) );
+                                        if( isset( $includeItem['weekdays'] ) && count( $includeItem['weekdays'] ) < 7 )
+                                        {
+                                            $include[$key]['weekdays'] = $includeItem['weekdays'];
+                                        }
                                         $tmpStarttime = clone $starttime;
                                         $tmpStarttime->setTime( 00, 00 );
                                         $tmpEndtime = clone $endtime;
                                         $tmpEndtime->setTime( 00, 00 );
                                         $days[$key] = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
                                     }
-                                    $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'set a start time.' );
                                 }
                             }
-                            else
+                            catch ( Exception $e )
                             {
-                                $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'select a start date.' );
-                            }
-                            if( isset( $validate['error'] ) )
-                            {
-                                if( isset( $days ) )
-                                    $http->setPostVariable( $base . '_ezpe_valid_days_' . $contentObjectAttribute->attribute( 'id' ), $days );
-                                $contentObjectAttribute->setValidationError( $validate['error'] );
-                                return eZInputValidator::STATE_INVALID;
+                                $validate['error'] = $e->getMessage();
                             }
                         }
+                        else
+                        {
+                            $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'Set a start time.' );
+                        }
+                    }
+                    else
+                    {
+                        $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'Select a start date.' );
+                    }
+                    if( isset( $validate['error'] ) )
+                    {
+                        $contentObjectAttribute->setValidationError( $validate['error'] );
+                        return eZInputValidator::STATE_INVALID;
                     }
                     if( isset( $data['exclude'] ) )
                     {
@@ -125,14 +105,14 @@ class eZPublishEventType extends eZDataType
                             if( isset( $excludeItem['startdate'] ) && trim( $excludeItem['startdate'] ) != '' && isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) != '' )
                             {
                                 $timeString = trim( $excludeItem['startdate'] ) . ' 00';
-                                $starttimeExc = $this->createDateTime( $timeString, null, 'start', $dateFormat );
+                                $starttimeExc = eZPublishEvent::createDateTime( $timeString, null, 'start', $contentObjectAttribute->LanguageCode );
                                 $validate = $this->validateDateTime( $now, $starttimeExc );
                                 if( isset( $validate['state'] ) )
                                 {
                                     if( isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) != '' )
                                     {
                                         $timeString = trim( $excludeItem['enddate'] ) . ' 00';
-                                        $endtimeExc = $this->createDateTime( $timeString, null, 'end', $dateFormat );
+                                        $endtimeExc = eZPublishEvent::createDateTime( $timeString, null, 'end', $contentObjectAttribute->LanguageCode );
                                     }
                                     else
                                     {
@@ -143,8 +123,8 @@ class eZPublishEventType extends eZDataType
                                     $validate = $this->validateDateTime( $now, $starttimeExc, $endtimeExc );
                                     if( isset( $validate['state'] ) )
                                     {
-                                        $exclude[$key] = array( 'start' => $starttimeExc->format( self::DATE_FORMAT ),
-                                                                'end' => $endtimeExc->format( self::DATE_FORMAT ) );
+                                        $exclude[$key] = array( 'start' => $starttimeExc->format( eZPublishEvent::DATE_FORMAT ),
+                                                                'end' => $endtimeExc->format( eZPublishEvent::DATE_FORMAT ) );
                                     }
                                 }
                             }
@@ -175,17 +155,7 @@ class eZPublishEventType extends eZDataType
                         $contentObjectAttribute->setAttribute( 'data_text', $jsonString );
                     }
                 }
-                else
-                {
-                    $contentObjectAttribute->setValidationError( ezpI18n::tr( 'extension/ezpublish-event', 'Please set your locale in dateformat in ezpublishevent.ini' ) );
-                    return eZInputValidator::STATE_INVALID;
-                }
             }
-        }
-        else
-        {
-            $contentObjectAttribute->setValidationError( ezpI18n::tr( 'extension/ezpublish-event', 'Please set a dateformat in ezpublishevent.ini' ) );
-            return eZInputValidator::STATE_INVALID;
         }
         return eZInputValidator::STATE_ACCEPTED;
     }
@@ -239,14 +209,6 @@ class eZPublishEventType extends eZDataType
                 {
                     $lastenddate = $endtimestamp;
                 }
-                // set the days for show/hide weekdays
-                $http = eZHTTPTool::instance();
-                $getDaysStarttime = clone $startdate;
-                $getDaysStarttime->setTime( 00, 00 );
-                $getDaysEndtime = clone $enddate;
-                $getDaysEndtime->setTime( 00, 00 );
-                $days[$key] = ( $getDaysEndtime->getTimestamp() - $getDaysStarttime->getTimestamp() ) / 86400;
-                $http->setPostVariable( 'ContentObjectAttribute_ezpe_valid_days_' . $contentObjectAttribute->attribute( 'id' ), $days );
             }
         }
         if( isset( $contentTmp->exclude ) && count( $contentTmp->exclude ) > 0 )
@@ -333,20 +295,6 @@ class eZPublishEventType extends eZDataType
             }
         }
         return array( 'state' => true );
-    }
-
-    function createDateTime( $timeString, $includeItem, $type, $dateFormat )
-    {
-        if( isset( $includeItem[$type.'time-minute'] ) && trim($includeItem[$type.'time-minute']) != '' )
-        {
-            $timeString .= ':' . trim( $includeItem[$type.'time-minute'] ) . ':00';
-        }
-        else
-        {
-            $timeString .= ':00:00';
-        }
-        $dateTime = DateTime::createFromFormat( $dateFormat, $timeString );
-        return $dateTime;
     }
 
     function sortKeyType()
