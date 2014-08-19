@@ -47,7 +47,7 @@ class eZPublishEventType extends eZDataType
                                         $timeString = trim( $includeItem['enddate'] );
                                         if( isset( $includeItem['endtime-hour'] ) && trim( $includeItem['endtime-hour']) != '' )
                                         {
-                                            $timeString .= trim( $includeItem['endtime-hour'] );
+                                            $timeString .= ' ' . trim( $includeItem['endtime-hour'] );
                                         }
                                         else
                                         {
@@ -216,7 +216,7 @@ class eZPublishEventType extends eZDataType
             $exclude = array();
             foreach( $contentTmp->exclude as $key => $contentExcludeItem )
             {
-                // initialize include
+                // initialize exclude
                 $startdateExc = new DateTime( $contentExcludeItem->start );
                 $starttimestamp = $startdateExc->getTimestamp();
                 $exclude[$key] = array( 'starttime' => $starttimestamp );
