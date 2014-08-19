@@ -70,11 +70,6 @@ class eZPublishEventType extends eZDataType
                                         {
                                             $include[$key]['weekdays'] = $includeItem['weekdays'];
                                         }
-                                        $tmpStarttime = clone $starttime;
-                                        $tmpStarttime->setTime( 00, 00 );
-                                        $tmpEndtime = clone $endtime;
-                                        $tmpEndtime->setTime( 00, 00 );
-                                        $days[$key] = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
                                     }
                                 }
                             }
@@ -188,14 +183,7 @@ class eZPublishEventType extends eZDataType
                 $include[$key]['starttime'] = $starttimestamp;
                 $enddate = new DateTime( $contentIncludeItem->end );
                 $endtimestamp = $enddate->getTimestamp();
-                // check if event is only one day
-                $tmpStartdate = clone $startdate;
-                $tmpStartdate->modify( '+1 day' );
-                $tmpStartdate->setTime( 00, 00 );
-                if( $endtimestamp > $tmpStartdate->getTimestamp() )
-                {
-                    $include[$key]['endtime'] = $endtimestamp;
-                }
+                $include[$key]['endtime'] = $endtimestamp;
                 if( isset( $contentIncludeItem->weekdays ) )
                 {
                     $include[$key]['weekdays'] = $contentIncludeItem->weekdays;
