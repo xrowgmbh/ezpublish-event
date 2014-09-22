@@ -5,9 +5,6 @@
      $dateFormat = $dateFormatArray[$locale.locale_code]
      $timeFormatArray = ezini( 'Settings', 'TimeFormat', 'ezpublishevent.ini' )
      $timeFormat = $timeFormatArray[$locale.locale_code]}
-{if ezhttp_hasvariable( concat( $attribute_base, '_ezpe_valid_days_', $attribute.id ), 'post' )}
-     {def $postDataDays = ezhttp( concat( $attribute_base, '_ezpe_valid_days_', $attribute.id ), 'post' )}
-{/if}
 {if ezhttp_hasvariable( concat( $attribute_base, '_ezpeventdate_data_', $attribute.id ), 'post' )}
     {def $postData = ezhttp( concat( $attribute_base, '_ezpeventdate_data_', $attribute.id ), 'post' )}
     {if is_set( $postData.include )}

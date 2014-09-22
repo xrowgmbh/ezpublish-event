@@ -2,8 +2,18 @@
 
 class eZPublishEvent
 {
-    const DATE_FORMAT = DateTime::ISO8601;
+    const DATE_FORMAT = "Y-m-d\TH:i:s\Z";
     static private $currentDateFormat = null;
+    private $FindINI = null;
+    private $eZPEventINI = null;
+    private $FieldsForSOLRIndex = null;
+
+    function __construct()
+    {
+        $this->FindINI = eZINI::instance( 'ezfind.ini' );
+        $this->eZPEventINI = eZINI::instance( 'ezpublishevent.ini' );
+        $this->FieldsForSOLRIndex = $this->eZPEventINI->variable( 'CronjobSettings', 'FieldsForSOLRIndex' );
+    }
 
     static function createDateTime( $timeString, $includeItem, $type, $locale )
     {
@@ -51,5 +61,158 @@ class eZPublishEvent
             }
         }
         return self::$currentDateFormat;
+    }
+
+    function createSOLRDocument( eZContentObjectTreeNode $node, $update )
+    {
+        $attributeName = $this->eZPEventINI->variable( 'CronjobSettings', 'AttributeName' );
+        $fieldsForSOLRIndex = $this->eZPEventINI->variable( 'CronjobSettings', 'FieldsForSOLRIndex' );
+        $dataMap = $node->dataMap();
+        if( isset( $dataMap[$attributeName] ) )
+        {
+            $ezpevent = $dataMap[$attributeName];
+            if( $ezpevent->hasContent() )
+            {
+                $docList = array();
+                $contentObject = $node->object();
+                $currentVersion = $contentObject->currentVersion();
+                $contentClassIdentifier = $contentObject->attribute( 'class_identifier' );
+
+                // Loop over each language version and create an eZSolrDoc for it
+                #foreach ( $availableLanguages as $languageCode )
+                #{
+                $languageCode = 'ger-DE';
+                $parent = $node->fetchParent();
+                $defaultData = array( 'attr_name_t' => $contentObject->name( false, $languageCode ),
+                                      'meta_id_si' => $contentObject->ID,
+                                      'meta_url_alias_ms' => $node->attribute( 'url_alias' ),
+                                      'meta_guid_ms'=> $contentObject->attribute( 'remote_id' ),
+                                      'meta_main_parent_node_id_si' => $parent->NodeID );
+
+                /*if( !$node->isMain() )
+                {
+                    $mainNode = $contentObject->attribute( 'main_node' );
+                    if ( !$mainNode )
+                    {
+                        eZDebug::writeError( 'Unable to fetch main node for object: ' . $contentObject->attribute( 'id' ), __METHOD__ );
+                        return false;
+                    }
+                    $mainNodeID = $mainNode->attribute( 'node_id' );
+                    $defaultData['main_node_id'] = $mainNodeID;
+                    $defaultData['main_url_alias'] = $mainNode->attribute( 'url_alias' );
+                    $defaultData['main_path_string'] = $mainNode->attribute( 'path_string' );
+                }*/
+                foreach ( $this->FieldsForSOLRIndex as $attributeIdentifier )
+                {
+                    if( isset( $dataMap[$attributeIdentifier] ) )
+                    {
+                        $attribute = $dataMap[$attributeIdentifier];
+                        $metaData = false;
+                        switch( $attribute->DataTypeString )
+                        {
+                            case 'xrowmetadata':
+                                $ident = 'attr_keywords____k';
+                                $content = $attribute->content();
+                                $metaData = $content->keywords;
+                                break;
+                            break;
+                            case 'ezxmltext':
+                                $ident = 'attr_' . $attributeIdentifier . '_s';
+                                // need _ms field too
+                                #$metaData = $attribute->metaData();
+                                #$defaultData["attr_" . $attributeIdentifier . "_ms"] = $metaData;
+                                break;
+                            case 'eztext':
+                                $ident = 'attr_' . $attributeIdentifier . '_t';
+                                break;
+                            case 'ezstring':
+                                $ident = 'attr_' . $attributeIdentifier . '_s';
+                                break;
+                            case 'xrowgis':
+                                $ident = 'attr_' . $attributeIdentifier . '_s';
+                                $xrowgis_att = $attribute->metaData();
+                                foreach($xrowgis_att as $att)
+                                {
+                                    if($att['id'] == "city")
+                                    {
+                                        $metaData = $att['text'];
+                                    
+                                    }
+                                }
+                                break;
+                            default:
+                                $ident = 'attr_' . $attributeIdentifier . '_t';
+                            break;
+                        }
+                        if( $metaData === false )
+                        {
+                            $metaData = $attribute->metaData();
+                        }
+                        $defaultData[$ident] = $metaData;
+                    }
+                }
+                //}
+                // get days
+                $ezpeventContent = $ezpevent->content();
+                // get at first exclude periods for better handling
+                if( isset( $ezpeventContent['json']['exclude'] ) )
+                {
+                    $excludeDays = array();
+                    foreach( $ezpeventContent['json']['exclude'] as $ezpeventExcludeItem )
+                    {
+                        for( $day = $ezpeventExcludeItem['starttime']; $day <= $ezpeventExcludeItem['endtime']; $day=$day+86400 )
+                        {
+                            $excludeDays[$day] = $day;
+                        }
+                    }
+                }
+                if( isset( $ezpeventContent['json']['include'] ) )
+                {
+                    foreach( $ezpeventContent['json']['include'] as $ezpeventItem )
+                    {
+                        $starttime = new DateTime();
+                        $starttime->setTimestamp( $ezpeventItem['starttime'] );
+                        $defaultData['attr_start_dt'] = $starttime->format( eZPublishEvent::DATE_FORMAT );
+                        $starttime->setTime( 00, 00 );
+                        $start = $starttime->getTimestamp();
+                        $endtime = new DateTime();
+                        $endtime->setTimestamp( $ezpeventItem['endtime'] );
+                        $defaultData['attr_end_dt'] = $endtime->format( eZPublishEvent::DATE_FORMAT );
+                        $endtime->setTime( 00, 00 );
+                        $end = $endtime->getTimestamp();
+                        // check all days
+                        for( $day = $start; $day <= $end; $day = $day+86400 )
+                        {
+                            if( !isset( $excludeDays ) || ( isset( $excludeDays ) && !array_key_exists( $day, $excludeDays ) ) )
+                            {
+                                if( !isset( $ezpeventItem['weekdays'] ) || ( isset( $ezpeventItem['weekdays'] ) && in_array( date( 'D', $day ), $ezpeventItem['weekdays'] ) ) )
+                                {
+                                    $doc = $update->createDocument();
+                                    $daytime = new DateTime();
+                                    $daytime->setTimestamp( $day );
+                                    $defaultData['attr_currentday_dt'] = $daytime->format( eZPublishEvent::DATE_FORMAT );
+                                    foreach( $defaultData as $defaultDataName => $defaultDataItem )
+                                    {
+                                        $doc->$defaultDataName = $defaultDataItem;
+                                    }
+                                    #die(var_dump($doc));
+                                    $docList[$day] = $doc;
+                                    unset( $doc );
+                                }
+                            }
+                        }
+                        #die(var_dump($docList));
+                    }
+                }
+                if( count( $docList ) > 0 )
+                {
+                    return $docList;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

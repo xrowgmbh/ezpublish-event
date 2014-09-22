@@ -31,23 +31,24 @@ class eZPublishEventType extends eZDataType
                 foreach( $data['include'] as $key => $includeItem )
                 {
                     $validate = array();
-                    if( isset( $includeItem['startdate'] ) && trim( $includeItem['startdate']) != '' )
+                    if( trim( $includeItem['startdate']) != '' )
                     {
-                        if( isset( $includeItem['starttime-hour'] ) && trim( $includeItem['starttime-hour'] ) != '' )
+                        if( trim( $includeItem['starttime-hour'] ) != '' )
                         {
                             $timeString = trim( $includeItem['startdate'] ) . ' ' . trim( $includeItem['starttime-hour'] );
                             try
                             {
                                 $starttime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'start', $contentObjectAttribute->LanguageCode );
+                                #die(var_dump($starttime));
                                 $validate = $this->validateDateTime( $now, $starttime );
                                 if( isset( $validate['state'] ) )
                                 {
-                                    if( isset( $includeItem['enddate'] ) && trim( $includeItem['enddate']) != '' )
+                                    if( trim( $includeItem['enddate'] ) != '' )
                                     {
                                         $timeString = trim( $includeItem['enddate'] );
-                                        if( isset( $includeItem['endtime-hour'] ) && trim( $includeItem['endtime-hour']) != '' )
+                                        if( trim( $includeItem['endtime-hour'] ) != '' )
                                         {
-                                            $timeString .= trim( $includeItem['endtime-hour'] );
+                                            $timeString .= ' ' . trim( $includeItem['endtime-hour'] );
                                         }
                                         else
                                         {
@@ -58,8 +59,19 @@ class eZPublishEventType extends eZDataType
                                     else
                                     {
                                         $endtime = clone $starttime;
-                                        $endtime->modify( '+1 day' );
-                                        $endtime->setTime( 00, 00 );
+                                        if( trim( $includeItem['endtime-hour'] ) == '00' || trim( $includeItem['endtime-hour'] ) == '' )
+                                        {
+                                            $endtime->modify( '+1 day' );
+                                            $endtime->setTime( 00, 00 );
+                                        }
+                                        elseif( trim( $includeItem['endtime-hour'] ) != '' && trim( $includeItem['endtime-minute'] ) != '' )
+                                        {
+                                            $endtime->setTime( trim( $includeItem['endtime-hour'] ), trim( $includeItem['endtime-minute'] ) );
+                                        }
+                                        elseif( trim( $includeItem['endtime-hour'] ) != '' && trim( $includeItem['endtime-minute'] ) == '' )
+                                        {
+                                            $endtime->setTime( trim( $includeItem['endtime-hour'] ), 00 );
+                                        }
                                     }
                                     $validate = $this->validateDateTime( $now, $starttime, $endtime );
                                     if( isset( $validate['state'] ) )
@@ -70,11 +82,6 @@ class eZPublishEventType extends eZDataType
                                         {
                                             $include[$key]['weekdays'] = $includeItem['weekdays'];
                                         }
-                                        $tmpStarttime = clone $starttime;
-                                        $tmpStarttime->setTime( 00, 00 );
-                                        $tmpEndtime = clone $endtime;
-                                        $tmpEndtime->setTime( 00, 00 );
-                                        $days[$key] = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
                                     }
                                 }
                             }
@@ -186,16 +193,11 @@ class eZPublishEventType extends eZDataType
                 $startdate = new DateTime( $contentIncludeItem->start );
                 $starttimestamp = $startdate->getTimestamp();
                 $include[$key]['starttime'] = $starttimestamp;
+                $include[$key]['start'] = $contentIncludeItem->start;
                 $enddate = new DateTime( $contentIncludeItem->end );
                 $endtimestamp = $enddate->getTimestamp();
-                // check if event is only one day
-                $tmpStartdate = clone $startdate;
-                $tmpStartdate->modify( '+1 day' );
-                $tmpStartdate->setTime( 00, 00 );
-                if( $endtimestamp > $tmpStartdate->getTimestamp() )
-                {
-                    $include[$key]['endtime'] = $endtimestamp;
-                }
+                $include[$key]['endtime'] = $endtimestamp;
+                $include[$key]['end'] = $contentIncludeItem->end;
                 if( isset( $contentIncludeItem->weekdays ) )
                 {
                     $include[$key]['weekdays'] = $contentIncludeItem->weekdays;
@@ -216,13 +218,15 @@ class eZPublishEventType extends eZDataType
             $exclude = array();
             foreach( $contentTmp->exclude as $key => $contentExcludeItem )
             {
-                // initialize include
+                // initialize exclude
                 $startdateExc = new DateTime( $contentExcludeItem->start );
                 $starttimestamp = $startdateExc->getTimestamp();
-                $exclude[$key] = array( 'starttime' => $starttimestamp );
+                $exclude[$key]['starttime'] = $starttimestamp;
+                $exclude[$key]['start'] = $contentExcludeItem->start;
                 $enddateExc = new DateTime( $contentExcludeItem->end );
                 $endtimestamp = $enddateExc->getTimestamp();
                 $exclude[$key]['endtime'] = $endtimestamp;
+                $exclude[$key]['end'] = $contentExcludeItem->end;
             }
         }
         if( isset( $include ) && count( $include ) > 0 )
@@ -249,7 +253,8 @@ class eZPublishEventType extends eZDataType
     */
     function metaData( $contentObjectAttribute )
     {
-        return (int)$contentObjectAttribute->attribute( 'data_text' );
+        $content = $this->objectAttributeContent( $this );
+        return $content;
     }
 
     function hasObjectAttributeContent( $contentObjectAttribute )

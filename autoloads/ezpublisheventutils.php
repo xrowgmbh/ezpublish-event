@@ -32,6 +32,8 @@ class eZPEventUtils
                 $item = $operatorValue;
                 if( !isset( $item['starttime-hour'] ) || ( isset( $item['starttime-hour'] ) && $item['starttime-hour'] == '' ) )
                     $item['starttime-hour'] = ' 00';
+                if( $item['enddate'] == '' )
+                    $item['enddate'] = trim( $item['startdate'] );
                 if( !isset( $item['endtime-hour'] ) || ( isset( $item['endtime-hour'] ) && $item['endtime-hour'] == '' ) )
                     $item['endtime-hour'] = ' 00';
                 $startTimeString = trim( $item['startdate'] ) . ' ' . trim( $item['starttime-hour'] );
