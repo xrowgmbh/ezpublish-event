@@ -2,7 +2,7 @@
 
 class eZPublishEvent
 {
-    const DATE_FORMAT = "Y-m-d\TH:i:s\Z";
+    const DATE_FORMAT = DateTime::ISO8601;
     static private $currentDateFormat = null;
     private $FindINI = null;
     private $eZPEventINI = null;
