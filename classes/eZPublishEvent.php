@@ -3,6 +3,7 @@
 class eZPublishEvent
 {
     const DATE_FORMAT = DateTime::ISO8601;
+    const DATE_FORMAT_SOLR = 'Y-m-d\TH:i:s\Z';
     static private $currentDateFormat = null;
     private $FindINI = null;
     private $eZPEventINI = null;
@@ -86,7 +87,6 @@ class eZPublishEvent
                 $defaultData = array( 'attr_name_t' => $contentObject->name( false, $languageCode ),
                                       'meta_id_si' => $contentObject->ID,
                                       'meta_url_alias_ms' => $node->attribute( 'url_alias' ),
-                                      'meta_guid_ms'=> $contentObject->attribute( 'remote_id' ),
                                       'meta_main_parent_node_id_si' => $parent->NodeID );
 
                 /*if( !$node->isMain() )
@@ -172,12 +172,12 @@ class eZPublishEvent
                     {
                         $starttime = new DateTime();
                         $starttime->setTimestamp( $ezpeventItem['starttime'] );
-                        $defaultData['attr_start_dt'] = $starttime->format( eZPublishEvent::DATE_FORMAT );
+                        $defaultData['attr_start_dt'] = $starttime->format( self::DATE_FORMAT_SOLR );
                         $starttime->setTime( 00, 00 );
                         $start = $starttime->getTimestamp();
                         $endtime = new DateTime();
                         $endtime->setTimestamp( $ezpeventItem['endtime'] );
-                        $defaultData['attr_end_dt'] = $endtime->format( eZPublishEvent::DATE_FORMAT );
+                        $defaultData['attr_end_dt'] = $endtime->format( self::DATE_FORMAT_SOLR );
                         $endtime->setTime( 00, 00 );
                         $end = $endtime->getTimestamp();
                         // check all days
@@ -190,18 +190,17 @@ class eZPublishEvent
                                     $doc = $update->createDocument();
                                     $daytime = new DateTime();
                                     $daytime->setTimestamp( $day );
-                                    $defaultData['attr_currentday_dt'] = $daytime->format( eZPublishEvent::DATE_FORMAT );
+                                    $defaultData['attr_currentday_dt'] = $daytime->format( self::DATE_FORMAT_SOLR );
+                                    $defaultData['meta_guid_ms']= $contentObject->attribute( 'remote_id' )."::".$daytime->format( self::DATE_FORMAT_SOLR );
                                     foreach( $defaultData as $defaultDataName => $defaultDataItem )
                                     {
                                         $doc->$defaultDataName = $defaultDataItem;
                                     }
-                                    #die(var_dump($doc));
                                     $docList[$day] = $doc;
                                     unset( $doc );
                                 }
                             }
                         }
-                        #die(var_dump($docList));
                     }
                 }
                 if( count( $docList ) > 0 )
@@ -213,6 +212,122 @@ class eZPublishEvent
                     return false;
                 }
             }
+        }
+    }
+    
+    public static function addEventAttribute()
+    {
+        if ( isset( $class_identifier ) )
+        {
+            $class = eZContentClass::fetchByIdentifier( $class_identifier );
+        }
+    
+        if ( ! is_object( $class ) )
+        {
+    
+            return;
+        }
+    
+        $classID = $class->attribute( 'id' );
+    
+        foreach ( $attributesInfo as $attributeInfo )
+        {
+            $classAttributeIdentifier = $attributeInfo['identifier'];
+            $classAttributeName = $attributeInfo['name'];
+            $datatype = $attributeInfo['data_type_string'];
+            $defaultValue = isset( $attributeInfo['default_value'] ) ? $attributeInfo['default_value'] : false;
+            $canTranslate = isset( $attributeInfo['can_translate'] ) ? $attributeInfo['can_translate'] : 1;
+            $isRequired = isset( $attributeInfo['is_required'] ) ? $attributeInfo['is_required'] : 0;
+            $isSearchable = isset( $attributeInfo['is_searchable'] ) ? $attributeInfo['is_searchable'] : 1;
+            $attrContent = isset( $attributeInfo['content'] ) ? $attributeInfo['content'] : false;
+    
+            $attrCreateInfo = array(
+                    'identifier' => $classAttributeIdentifier ,
+                    'name' => $classAttributeName ,
+                    'can_translate' => $canTranslate ,
+                    'is_required' => $isRequired ,
+                    'is_searchable' => $isSearchable
+            );
+            $newAttribute = eZContentClassAttribute::create( $classID, $datatype, $attrCreateInfo );
+    
+            $dataType = $newAttribute->dataType();
+            $dataType->initializeClassAttribute( $newAttribute );
+    
+            // not all datatype can have 'default_value'. do check here.
+            if ( $defaultValue !== false )
+            {
+                switch ( $datatype )
+                {
+                	case 'ezboolean':
+                	    {
+                	        $newAttribute->setAttribute( 'data_int3', $defaultValue );
+                	    }
+                	    break;
+    
+                	default:
+                	    break;
+                }
+            }
+    
+            if ( $attrContent )
+                $newAttribute->setContent( $attrContent );
+    
+            // store attribute, update placement, etc...
+            $attributes = $class->fetchAttributes();
+            $attributes[] = $newAttribute;
+    
+            // remove temporary version
+            if ( $newAttribute->attribute( 'id' ) !== null )
+            {
+                $newAttribute->remove();
+            }
+    
+            $newAttribute->setAttribute( 'version', eZContentClass::VERSION_STATUS_DEFINED );
+            $newAttribute->setAttribute( 'placement', count( $attributes ) );
+    
+            $class->adjustAttributePlacements( $attributes );
+            foreach ( $attributes as $attribute )
+            {
+                $attribute->storeDefined();
+            }
+    
+            // update objects
+            $classAttributeID = $newAttribute->attribute( 'id' );
+            $count = eZContentObject::fetchSameClassListCount( $class->ID );
+            $output = new ezcConsoleOutput();
+            $bar = new ezcConsoleProgressbar( $output, (int) $count );
+            $offset = 0;
+            $limit = 50;
+            while ( true )
+            {
+                if ( $offset > $count )
+                {
+                    break;
+                }
+                $objects = eZContentObject::fetchSameClassList( $classID, true, $offset, $limit );
+                foreach ( $objects as $object )
+                {
+                    $contentobjectID = $object->attribute( 'id' );
+                    $objectVersions = $object->versions();
+                    foreach ( $objectVersions as $objectVersion )
+                    {
+                        $translations = $objectVersion->translations( false );
+                        $version = $objectVersion->attribute( 'version' );
+                        foreach ( $translations as $translation )
+                        {
+                            $objectAttribute = eZContentObjectAttribute::create( $classAttributeID, $contentobjectID, $version );
+                            $objectAttribute->setAttribute( 'language_code', $translation );
+                            $objectAttribute->initialize();
+                            $objectAttribute->store();
+                            $objectAttribute->postInitialize();
+                        }
+                    }
+                    $bar->advance();
+                }
+                eZContentObject::clearCache();
+                $offset += $limit;
+            }
+            $bar->finish();
         }
     }
 }
