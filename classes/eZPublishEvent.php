@@ -66,7 +66,7 @@ class eZPublishEvent
 
     function createSOLRDocument( eZContentObjectTreeNode $node, $update )
     {
-        $attributeName = $this->eZPEventINI->variable( 'CronjobSettings', 'AttributeName' );
+        $attributeName = $this->eZPEventINI->variable( 'Settings', 'AttributeName' );
         $fieldsForSOLRIndex = $this->eZPEventINI->variable( 'CronjobSettings', 'FieldsForSOLRIndex' );
         $dataMap = $node->dataMap();
         if( isset( $dataMap[$attributeName] ) )
@@ -215,119 +215,72 @@ class eZPublishEvent
         }
     }
     
-    public static function addEventAttribute()
+    public static function addEventAttribute( $class, $attrCreateInfo )
     {
-        if ( isset( $class_identifier ) )
-        {
-            $class = eZContentClass::fetchByIdentifier( $class_identifier );
-        }
-    
         if ( ! is_object( $class ) )
         {
-    
             return;
         }
-    
         $classID = $class->attribute( 'id' );
-    
-        foreach ( $attributesInfo as $attributeInfo )
+        $newAttribute = eZContentClassAttribute::create( $classID, eZPublishEventType::DATA_TYPE_STRING, $attrCreateInfo );
+        $dataType = $newAttribute->dataType();
+        $dataType->initializeClassAttribute( $newAttribute );
+        // store attribute, update placement, etc...
+        $attributes = $class->fetchAttributes();
+        $attributes[] = $newAttribute;
+
+        // remove temporary version
+        if ( $newAttribute->attribute( 'id' ) !== null )
         {
-            $classAttributeIdentifier = $attributeInfo['identifier'];
-            $classAttributeName = $attributeInfo['name'];
-            $datatype = $attributeInfo['data_type_string'];
-            $defaultValue = isset( $attributeInfo['default_value'] ) ? $attributeInfo['default_value'] : false;
-            $canTranslate = isset( $attributeInfo['can_translate'] ) ? $attributeInfo['can_translate'] : 1;
-            $isRequired = isset( $attributeInfo['is_required'] ) ? $attributeInfo['is_required'] : 0;
-            $isSearchable = isset( $attributeInfo['is_searchable'] ) ? $attributeInfo['is_searchable'] : 1;
-            $attrContent = isset( $attributeInfo['content'] ) ? $attributeInfo['content'] : false;
-    
-            $attrCreateInfo = array(
-                    'identifier' => $classAttributeIdentifier ,
-                    'name' => $classAttributeName ,
-                    'can_translate' => $canTranslate ,
-                    'is_required' => $isRequired ,
-                    'is_searchable' => $isSearchable
-            );
-            $newAttribute = eZContentClassAttribute::create( $classID, $datatype, $attrCreateInfo );
-    
-            $dataType = $newAttribute->dataType();
-            $dataType->initializeClassAttribute( $newAttribute );
-    
-            // not all datatype can have 'default_value'. do check here.
-            if ( $defaultValue !== false )
-            {
-                switch ( $datatype )
-                {
-                	case 'ezboolean':
-                	    {
-                	        $newAttribute->setAttribute( 'data_int3', $defaultValue );
-                	    }
-                	    break;
-    
-                	default:
-                	    break;
-                }
-            }
-    
-            if ( $attrContent )
-                $newAttribute->setContent( $attrContent );
-    
-            // store attribute, update placement, etc...
-            $attributes = $class->fetchAttributes();
-            $attributes[] = $newAttribute;
-    
-            // remove temporary version
-            if ( $newAttribute->attribute( 'id' ) !== null )
-            {
-                $newAttribute->remove();
-            }
-    
-            $newAttribute->setAttribute( 'version', eZContentClass::VERSION_STATUS_DEFINED );
-            $newAttribute->setAttribute( 'placement', count( $attributes ) );
-    
-            $class->adjustAttributePlacements( $attributes );
-            foreach ( $attributes as $attribute )
-            {
-                $attribute->storeDefined();
-            }
-    
-            // update objects
-            $classAttributeID = $newAttribute->attribute( 'id' );
-            $count = eZContentObject::fetchSameClassListCount( $class->ID );
-            $output = new ezcConsoleOutput();
-            $bar = new ezcConsoleProgressbar( $output, (int) $count );
-            $offset = 0;
-            $limit = 50;
-            while ( true )
-            {
-                if ( $offset > $count )
-                {
-                    break;
-                }
-                $objects = eZContentObject::fetchSameClassList( $classID, true, $offset, $limit );
-                foreach ( $objects as $object )
-                {
-                    $contentobjectID = $object->attribute( 'id' );
-                    $objectVersions = $object->versions();
-                    foreach ( $objectVersions as $objectVersion )
-                    {
-                        $translations = $objectVersion->translations( false );
-                        $version = $objectVersion->attribute( 'version' );
-                        foreach ( $translations as $translation )
-                        {
-                            $objectAttribute = eZContentObjectAttribute::create( $classAttributeID, $contentobjectID, $version );
-                            $objectAttribute->setAttribute( 'language_code', $translation );
-                            $objectAttribute->initialize();
-                            $objectAttribute->store();
-                            $objectAttribute->postInitialize();
-                        }
-                    }
-                    $bar->advance();
-                }
-                eZContentObject::clearCache();
-                $offset += $limit;
-            }
-            $bar->finish();
+            $newAttribute->remove();
         }
+
+        $newAttribute->setAttribute( 'version', eZContentClass::VERSION_STATUS_DEFINED );
+        $newAttribute->setAttribute( 'placement', count( $attributes ) );
+
+        $class->adjustAttributePlacements( $attributes );
+        foreach ( $attributes as $attribute )
+        {
+            $attribute->storeDefined();
+        }
+
+        // update objects
+        $classAttributeID = $newAttribute->attribute( 'id' );
+        $count = eZContentObject::fetchSameClassListCount( $class->ID );
+        $output = new ezcConsoleOutput();
+        $bar = new ezcConsoleProgressbar( $output, (int) $count );
+        $offset = 0;
+        $limit = 50;
+        while ( true )
+        {
+            if ( $offset > $count )
+            {
+                break;
+            }
+            $objects = eZContentObject::fetchSameClassList( $classID, true, $offset, $limit );
+            foreach ( $objects as $object )
+            {
+                $contentobjectID = $object->attribute( 'id' );
+                $objectVersions = $object->versions();
+                foreach ( $objectVersions as $objectVersion )
+                {
+                    $translations = $objectVersion->translations( false );
+                    $version = $objectVersion->attribute( 'version' );
+                    foreach ( $translations as $translation )
+                    {
+                        $objectAttribute = eZContentObjectAttribute::create( $classAttributeID, $contentobjectID, $version );
+                        $objectAttribute->setAttribute( 'language_code', $translation );
+                        $objectAttribute->initialize();
+                        $objectAttribute->store();
+                        $objectAttribute->postInitialize();
+                    }
+                }
+                $bar->advance();
+            }
+            eZContentObject::clearCache();
+            $offset += $limit;
+        }
+        $bar->finish();
+        return $newAttribute;
     }
 }

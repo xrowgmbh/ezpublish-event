@@ -1,8 +1,8 @@
 <?php
 
 /* 
- * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --parentNodeID=363959 --classidentifier=event --eventfield=ezpevent --field1=start --field2=end --limit=6000 --offset=0
- * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --classidentifier=event --deleteFields=start,end,event_series
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --parentNodeID=363959 --classidentifier=event --eventfield=ezpevent --startfield=start --endfield=end --limit=6000 --offset=0
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --remove --classidentifier=event --deleteFields=start,end,event_series
  */
 
 require 'autoload.php';
@@ -14,14 +14,14 @@ $script = eZScript::instance( array(
     'use-extensions' => true 
 ) );
 
-$options = $script->getOptions( "[parentNodeID:][classidentifier:][eventfield:][field1:][field2:][deleteFields:][limit:][offset:]",
+$options = $script->getOptions( "[replace][remove][parentNodeID:][classidentifier:][eventfield:][startfield:][endfield:][deleteFields:][limit:][offset:]",
         "",
         array() );
 
 $script->startup();
 $script->initialize();
 
-$ini = eZINI::instance();
+$ini = eZINI::instance( 'site.ini' );
 $userCreatorID = $ini->variable( 'UserSettings', 'UserCreatorID' );
 $user = eZUser::fetch( $userCreatorID );
 if ( !$user )
@@ -31,104 +31,166 @@ if ( !$user )
 }
 eZUser::setCurrentlyLoggedInUser( $user, $userCreatorID );
 
-if(!isset($options[ 'classidentifier' ]))
+$ezpublishevent_ini = eZINI::instance( 'ezpublishevent.ini' );
+if(!isset($options['classidentifier']))
 {
-    $cli->error( "Please set a classidentifier" );
-    $script->shutdown( 1 );
+    if($ezpublishevent_ini->hasVariable( 'Settings', 'EventClassIdentifier' ))
+    {
+        $classidentifier = $ezpublishevent_ini->variable( 'Settings', 'EventClassIdentifier' );
+    }
+    else
+    {
+        $cli->error( "Please set a classidentifier" );
+        $script->shutdown( 1 );
+    }
 }
 else
     $classidentifier = $options['classidentifier'];
+$limit = $options['limit'] ? (int)$options['limit'] : 1000;
+$offset = $options['offset'] ? (int)$options['offset'] : 0;
+if(isset($options['replace']))
+{
+    if(!isset($options['eventfield']))
+    {
+        if($ezpublishevent_ini->hasVariable( 'Settings', 'AttributeName' ))
+        {
+            $eventfield = $ezpublishevent_ini->variable( 'Settings', 'AttributeName' );
+        }
+        else
+        {
+            $cli->error( "Please set an eventfield" );
+            $script->shutdown( 1 );
+        }
+    }
+    else
+        $eventfield = $options['eventfield'];
 
-$eventfield = $options['eventfield'] ? $options['eventfield'] : false;
-if( $eventfield !== false )
-{
-    if(!isset($options[ 'parentNodeID' ]))
+    if(isset($eventfield))
     {
-        $cli->error( "Please set a parentNodeID" );
-        $script->shutdown( 1 );
-    }
-    else
-        $parentNodeID = (int)$options['parentNodeID'];
-    if(!isset($options[ 'field1' ]) || !isset($options[ 'field2' ]))
-    {
-        if(!isset($options[ 'field1' ]) && isset($options[ 'field2' ]))
-            $cli->error( "Please set field1" );
-        if(isset($options[ 'field1' ]) && !isset($options[ 'field2' ]))
-            $cli->error( "Please set field2" );
-        if(!isset($options[ 'field1' ]) && !isset($options[ 'field2' ]))
-            $cli->error( "Please set field1 and field2" );
-        $script->shutdown( 1 );
-    }
-    else
-    {
-        if( strpos( 'start', $options[ 'field1' ] ) !== false )
-            $field1 = $options[ 'field1' ];
-        else
+        // chech if attribute is set
+        $class = eZContentClass::fetchByIdentifier($classidentifier);
+        $eventattribute = $class->fetchAttributeByIdentifier($eventfield);
+        if($eventattribute === null)
         {
-            $cli->error( "field1 have to be the start date" );
-            $script->shutdown( 1 );
+            $attrCreateInfo = array(
+                    'identifier' => $eventfield,
+                    'name' => 'Eventdaten',
+                    'can_translate' => 1,
+                    'is_required' => 0,
+                    'is_searchable' => 0
+            );
+            $eventattribute = eZPublishEvent::addEventAttribute( $class, $attrCreateInfo );
         }
-        if( strpos( 'end', $options[ 'field2' ] ) !== false )
-            $field2 = $options[ 'field2' ];
-        else
+        if($eventattribute !== null)
         {
-            $cli->error( "field2 have to be the end date" );
-            $script->shutdown( 1 );
-        }
-    }
-}
-$deleteFields = $options['deleteFields'] ? $options['deleteFields'] : false;
-$limit = $options[ 'limit' ] ? (int)$options[ 'limit' ] : 1000;
-$offset = $options[ 'offset' ] ? (int)$options[ 'offset' ] : 0;
-if( $eventfield !== false )
-{
-    $params = array( 'Limit' => $limit,
-                     'Offset' => $offset,
-                     'SortBy' => array('published', true),
-                     'IgnoreVisibility' => true,
-                     'ClassFilterType' => 'include',
-                     'ClassFilterArray' => array( $classidentifier ) );
-    $nodes = eZContentObjectTreeNode::subTreeByNodeID( $params, $parentNodeID );
-    if( count( $nodes ) > 0 )
-    {
-        $cli->output( "Start fetching " . count( $nodes ). " " . $classidentifier );
-        foreach( $nodes as $node )
-        {
-            if( $node instanceof eZContentObjectTreeNode ) 
+            if(!isset($options['parentNodeID']))
             {
-                $dataMap = $node->dataMap();
-                if( isset( $dataMap[$eventfield] ) )
+                if($ezpublishevent_ini->hasVariable( 'Settings', 'ParentNodeID' ))
                 {
-                    if( isset( $dataMap[$field1] ) && isset( $dataMap[$field2] ) )
-                    {
-                        $startdate = $dataMap[$field1];
-                        $enddate = $dataMap[$field2];
-                        $start = new DateTime();
-                        $start->setTimestamp($startdate->attribute( 'data_int' ));
-                        $end = new DateTime();
-                        $end->setTimestamp($enddate->attribute( 'data_int' ));
-                        $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
-                                                                          'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
-                        $jsonString = json_encode( $include );
-                        $dataMap[$eventfield]->setAttribute( 'data_text', $jsonString );
-                        $dataMap[$eventfield]->store();
-                        $node->store();
-                        $cli->output( "Set value for node " . $node->NodeID );
-                    }
-                    else
-                    {
-                        $cli->error( "field1 and field2 have to be in the data map of the node" );
-                        $script->shutdown( 1 );
-                    }
+                    $parentNodeID = $ezpublishevent_ini->variable( 'Settings', 'ParentNodeID' );
                 }
                 else
                 {
-                    $cli->error( "eventfield has to be in the data map of the node" );
+                    $cli->error( "Please set a parentNodeID" );
                     $script->shutdown( 1 );
+                }
+            }
+            else
+                $parentNodeID = $options['parentNodeID'];
+            if(isset($parentNodeID))
+            {
+                if(!isset($options['startfield']) || !isset($options['endfield']))
+                {
+                    if(!isset($options['startfield']) && isset($options['endfield']))
+                        $cli->error( "Please set startfield" );
+                    if(isset($options['startfield']) && !isset($options['endfield']))
+                        $cli->error( "Please set endfield" );
+                    if(!isset($options['startfield']) && !isset($options['endfield']))
+                        $cli->error( "Please set startfield and endfield" );
+                    $script->shutdown( 1 );
+                }
+                else
+                {
+                    if( strpos( 'start', $options['startfield'] ) !== false )
+                        $startfield = $options[ 'startfield' ];
+                    else
+                    {
+                        $cli->error( "startfield have to be the start date" );
+                        $script->shutdown( 1 );
+                    }
+                    if( strpos( 'end', $options['endfield'] ) !== false )
+                        $endfield = $options[ 'endfield' ];
+                    else
+                    {
+                        $cli->error( "endfield have to be the end date" );
+                        $script->shutdown( 1 );
+                    }
+                }
+                $params = array( 'Limit' => $limit,
+                                 'Offset' => $offset,
+                                 'SortBy' => array('published', true),
+                                 'IgnoreVisibility' => true,
+                                 'ClassFilterType' => 'include',
+                                 'ClassFilterArray' => array( $classidentifier ) );
+                $nodes = eZContentObjectTreeNode::subTreeByNodeID( $params, $parentNodeID );
+                if( count( $nodes ) > 0 )
+                {
+                    $cli->output( "Start fetching " . count( $nodes ). " " . $classidentifier );
+                    foreach( $nodes as $node )
+                    {
+                        if( $node instanceof eZContentObjectTreeNode )
+                        {
+                            $dataMap = $node->dataMap();
+                            if( isset( $dataMap[$eventfield] ) )
+                            {
+                                if( isset( $dataMap[$startfield] ) && isset( $dataMap[$endfield] ) )
+                                {
+                                    $startdate = $dataMap[$startfield];
+                                    $enddate = $dataMap[$endfield];
+                                    $start = new DateTime();
+                                    $start->setTimestamp($startdate->attribute( 'data_int' ));
+                                    $end = new DateTime();
+                                    $end->setTimestamp($enddate->attribute( 'data_int' ));
+                                    $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
+                                                                                      'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
+                                    $jsonString = json_encode( $include );
+                                    $dataMap[$eventfield]->setAttribute( 'data_text', $jsonString );
+                                    $dataMap[$eventfield]->store();
+                                    $node->store();
+                                    $cli->output( "Set value for node " . $node->NodeID );
+                                }
+                                else
+                                {
+                                    $cli->error( "startfield and endfield have to be in the data map of the node" );
+                                    $script->shutdown( 1 );
+                                }
+                            }
+                            else
+                            {
+                                $cli->error( "eventfield has to be in the data map of the node" );
+                                $script->shutdown( 1 );
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+}
+if(isset($options['remove']))
+{
+    if(!isset($options['deleteFields']))
+    {
+        $cli->error( "Please set deleteFields" );
+        $script->shutdown( 1 );
+    }
+    else
+        $deleteFields = $options['parentNodeID'];
+}
+
+if( $eventfield !== false )
+{
+    
 }
 if( $deleteFields !== false && $deleteFields != '' )
 {
