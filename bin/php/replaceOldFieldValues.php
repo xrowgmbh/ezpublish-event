@@ -1,8 +1,16 @@
 <?php
 
 /* 
+ * if you don't set EventClassIdentifier or/and AttributeName or/and ParentNodeID in your ezpublishevent.ini or you would like to overwrite them, use this script with this options
  * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --parentNodeID=363959 --classidentifier=event --eventfield=ezpevent --startfield=start --endfield=end --limit=6000 --offset=0
+ * otherwise like this
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --startfield=start --endfield=end --limit=6000 --offset=0
+ * 
+ * to remove old attributes
+ * if you don't set EventClassIdentifier in your ezpublishevent.ini or you would like to overwrite it, use this script with option "--classidentifier=xyz"
  * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --remove --classidentifier=event --deleteFields=start,end,event_series
+ * otherwise like this
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --remove --deleteFields=start,end,event_series
  */
 
 require 'autoload.php';
@@ -64,7 +72,6 @@ if(isset($options['replace']))
     }
     else
         $eventfield = $options['eventfield'];
-
     if(isset($eventfield))
     {
         // chech if attribute is set
@@ -185,26 +192,24 @@ if(isset($options['remove']))
         $script->shutdown( 1 );
     }
     else
-        $deleteFields = $options['parentNodeID'];
-}
+        $deleteFields = $options['deleteFields'];
 
-if( $eventfield !== false )
-{
-    
-}
-if( $deleteFields !== false && $deleteFields != '' )
-{
-    $cli->output( "Start removing attributes " . $deleteFields );
-    $deleteFieldsArray = explode( ',', $deleteFields );
-    if( is_array( $deleteFieldsArray ) && count( $deleteFieldsArray ) > 0 )
+    if( $deleteFields !== false && $deleteFields != '' )
     {
-        $deleteAttributes = array();
-        $class = eZContentClass::fetchByIdentifier( $classidentifier );
-        foreach( $deleteFieldsArray as $deleteField )
+        $cli->output( "Start removing attributes " . $deleteFields );
+        $deleteFieldsArray = explode( ',', $deleteFields );
+        if( is_array( $deleteFieldsArray ) && count( $deleteFieldsArray ) > 0 )
         {
-            $deleteAttributes[] = $class->fetchAttributeByIdentifier( $deleteField );
+            $deleteAttributes = array();
+            $class = eZContentClass::fetchByIdentifier( $classidentifier );
+            foreach( $deleteFieldsArray as $deleteField )
+            {
+                $deleteAttributes[] = $class->fetchAttributeByIdentifier( $deleteField );
+            }
+            $cli->output( "ES WURDE NICHT GELOESCHT, WEIL DER BEFEHL DEAKTIVIERT IST" );
+            #$class->removeAttributes( $deleteAttributes );
         }
-        $cli->output( "ES WURDE NICHT GELÖSCHT, WEIL DER BEFEHL DEAKTIVIERT IST" );
-        #$class->removeAttributes( $deleteAttributes );
     }
 }
+$cli->output( "Ready" );
+$script->shutdown();
