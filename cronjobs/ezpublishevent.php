@@ -18,7 +18,9 @@ $parentNodeID = $ezpevent_ini->variable( 'CronjobSettings', 'ParentNodeID' );
 $classIdentifier = $ezpevent_ini->variable( 'Settings', 'EventClassIdentifier' );
 $limit = 500;
 $offset = 0;
-$clearIndex = true;
+
+####### WICHTIG: wenn das auf true ist, wird der ganze SOLR-Index entfernt
+$clearIndex = false;
 
 // execute the ping query
 try
