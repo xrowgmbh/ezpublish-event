@@ -2,6 +2,7 @@
 $module = $Params['Module'];
 $tpl = eZTemplate::factory();
 $http = eZHTTPTool::instance();
+$ini = eZINI::instance( 'ezpublishevent.ini' );
 $limit=10;
 $heute=time();
 
@@ -39,7 +40,7 @@ if($http->hasvariable('SubTreeArray'))
 {
     $SubTreeArray = $http->variable('SubTreeArray');
 }else{
-    $SubTreeArray = "363959";
+    $SubTreeArray = $ini->variable( 'Settings', 'SearchSource' );
 }
 
 if( $http->hasVariable('free_event'))
