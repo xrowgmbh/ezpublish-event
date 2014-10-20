@@ -50,7 +50,588 @@ jQuery(document).ready(function() {
             }
         });
     });
+    
+    //for event search
+    $.date = function(dateObject) {
+        var d = new Date(dateObject * 1000);
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var date = day + "." + month + "." + year;
+        return date;
+    };
+    $.datejava = function(dateObject) {
+        var d = new Date(dateObject);
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var date = day + "." + month + "." + year;
+        return date;
+    };
+
+    if($("#contenteventsearch").length > 0)
+    {
+        var sorttype ='';
+        var searchtext_temp='';
+        var subtreearray='';
+        var fromDate='';
+        var toDate='';
+        var event_city='';
+        var free_event='';
+        var long_event='';
+        var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
+
+        $.each(facetlist_temp,function(i,fd)
+        {
+            if(fd.name=='sort_type'){
+                sorttype=fd.value;
+            }else if(fd.name=='SearchText'){
+                searchtext_temp=fd.value;
+            }else if(fd.name=='SubTreeArray'){
+                subtreearray=fd.value;
+            }else if(fd.name=='fromDate'){
+                fromDate=fd.value;
+            }else if(fd.name=='toDate'){
+                toDate=fd.value;
+            }else if(fd.name=='event_city'){
+                event_city=fd.value;
+            }else if(fd.name=='free_event'){
+                free_event=fd.value;
+            }else if(fd.name=='long_event'){
+                long_event=fd.value;
+            }
+         });
+        var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+        var url = '/update/searchevent';
+        $("#search_results").children().remove();
+        $("#search_results").addClass("is_loading");
+        var aj=$.ajax({
+            url:url,
+            data:(param),
+            type:'POST',
+            dataType:'json',
+            success:function(data){
+                var today1 = $.datejava(new Date().getTime());
+                var tomorrow1 = $.datejava(new Date().getTime() + 3600*24*1000);
+                $("#search_results").removeClass("is_loading");
+                for (var i in data)
+                {
+                    if(i == 'result_nummer')
+                    {
+                        $('.search_result_number_line .result_numer').html(data[i]);
+                        var optInit = getOptionsFromForm();
+                        $("#Pagination").pagination(data[i], optInit);
+                    }
+                }
+                
+                function pageselectCallback(page_index, jq){
+                    var items_per_page = $('#items_per_page').val();
+                    var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
+                    var newcontent = '';
+                    var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                                  'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
+                                  'sort_type':sorttype,'offset':page_index};
+                    if(page_index >= 1)
+                    {
+                        $("#search_results").addClass("is_loading");
+                        $("#search_results").children().remove();
+                        var ajx=$.ajax({
+                            url:url,
+                            data:(params),
+                            type:'POST',
+                            dataType:'json',
+                            success:function(datas){ 
+                                var max_elems = Math.min((page_index+1) * items_per_page, datas.facet_list.length);
+                                for(var i=0;i<max_elems;i++)
+                                {
+                                    var today2=$.date(datas.facet_list[i][0]);
+                                    var mark= datas.facet_list[i][2];
+                                    if(today1 == today2 && mark == 0)
+                                    {
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                    }else if(tomorrow1 == today2 && mark == 0){
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                    }else if(mark == 0){
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
+                                    }
+                                    newcontent += datas.facet_list[i][1];
+                                }
+                                $("#search_results").removeClass("is_loading");
+                                $('#search_results').append(newcontent);
+                                $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                                $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                            },
+                            error:function(){
+                                alert("error page!");
+                            } });
+                    }else{
+                        for(var i=page_index*items_per_page;i<max_elem;i++)
+                        {
+                            var today2=$.date(data.facet_list[i][0]);
+                            var mark= data.facet_list[i][2];
+                            if(today1 == today2 && mark == 0)
+                            {
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                            }else if(tomorrow1 == today2 && mark == 0){
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                            }else if(mark == 0){
+                                newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
+                            }
+                            newcontent += data.facet_list[i][1];
+                        }
+                        $("#search_results").removeClass("is_loading");
+                        $("#search_results").children().remove();
+                        $('#search_results').append(newcontent);
+                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                    }
+                    return false;
+                }
+                function getOptionsFromForm(){
+                    var opt = {callback: pageselectCallback};
+                    $("input:text").each(function(){
+                        opt[this.name] = this.className.match(/numeric/) ? parseInt(this.value) : this.value;
+                    });
+                    var htmlspecialchars ={ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;"}
+                    $.each(htmlspecialchars, function(k,v){
+                        opt.prev_text = opt.prev_text.replace(k,v);
+                        opt.next_text = opt.next_text.replace(k,v);
+                    })
+                    return opt;
+                }
+            },
+            error:function(){
+                alert("error!");
+            }
+        });
+    }
+    
+    $("#contenteventsearch .searchtext").live("keydown",function(e){
+        if(e.keyCode==13)
+        { 
+            var sorttype ='';
+            var searchtext_temp='';
+            var subtreearray='';
+            var fromDate='';
+            var toDate='';
+            var event_city='';
+            var free_event='';
+            var long_event='';
+            var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
+
+            $.each(facetlist_temp,function(i,fd)
+            {
+                if(fd.name=='sort_type'){
+                    sorttype=fd.value;
+                }else if(fd.name=='SearchText'){
+                    searchtext_temp=fd.value;
+                }else if(fd.name=='SubTreeArray'){
+                    subtreearray=fd.value;
+                }else if(fd.name=='fromDate'){
+                    fromDate=fd.value;
+                }else if(fd.name=='toDate'){
+                    toDate=fd.value;
+                }else if(fd.name=='event_city'){
+                    event_city=fd.value;
+                }else if(fd.name=='free_event'){
+                    free_event=fd.value;
+                }else if(fd.name=='long_event'){
+                    long_event=fd.value;
+                }
+             });
+            var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                         'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+            var url = '/update/searchevent';
+            $("#search_results").children().remove();
+            $("#search_results").addClass("is_loading");
+            var aj=$.ajax({
+                url:url,
+                data:(param),
+                type:'POST',
+                dataType:'json',
+                success:function(data){
+                    var today1 = $.datejava(new Date().getTime());
+                    var tomorrow1 = $.datejava(new Date().getTime() + 3600*24*1000);
+                    $("#search_results").removeClass("is_loading");
+                    for (var i in data)
+                    {
+                        if(i == 'result_nummer')
+                        {
+                            $('.search_result_number_line .result_numer').html(data[i]);
+                            var optInit = getOptionsFromForm();
+                            $("#Pagination").pagination(data[i], optInit);
+                        }
+                    }
+                    
+                    function pageselectCallback(page_index, jq){
+                        var items_per_page = $('#items_per_page').val();
+                        var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
+                        var newcontent = '';
+                        var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                                      'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
+                                      'sort_type':sorttype,'offset':page_index};
+                        if(page_index >= 1)
+                        {
+                            $("#search_results").addClass("is_loading");
+                            $("#search_results").children().remove();
+                            var ajx=$.ajax({
+                                url:url,
+                                data:(params),
+                                type:'POST',
+                                dataType:'json',
+                                success:function(datas){ 
+                                    var max_elems = Math.min((page_index+1) * items_per_page, datas.facet_list.length);
+                                    for(var i=0;i<max_elems;i++)
+                                    {
+                                        var today2=$.date(datas.facet_list[i][0]);
+                                        var mark= datas.facet_list[i][2];
+                                        if(today1 == today2 && mark == 0)
+                                        {
+                                            newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        }else if(tomorrow1 == today2 && mark == 0){
+                                            newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        }else if(mark == 0){
+                                            newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
+                                        }
+                                        newcontent += datas.facet_list[i][1];
+                                    }
+                                    $("#search_results").removeClass("is_loading");
+                                    $('#search_results').append(newcontent);
+                                    $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                                    $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                                },
+                                error:function(){
+                                    alert("error page!");
+                                } });
+                        }else{
+                            for(var i=page_index*items_per_page;i<max_elem;i++)
+                            {
+                                var today2=$.date(data.facet_list[i][0]);
+                                var mark= data.facet_list[i][2];
+                                if(today1 == today2 && mark == 0)
+                                {
+                                    newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                }else if(tomorrow1 == today2 && mark == 0){
+                                    newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                }else if(mark == 0){
+                                    newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
+                                }
+                                newcontent += data.facet_list[i][1];
+                            }
+                            $("#search_results").removeClass("is_loading");
+                            $("#search_results").children().remove();
+                            $('#search_results').append(newcontent);
+                            $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                            $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                        }
+                        return false;
+                    }
+                    function getOptionsFromForm(){
+                        var opt = {callback: pageselectCallback};
+                        $("input:text").each(function(){
+                            opt[this.name] = this.className.match(/numeric/) ? parseInt(this.value) : this.value;
+                        });
+                        var htmlspecialchars ={ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;"}
+                        $.each(htmlspecialchars, function(k,v){
+                            opt.prev_text = opt.prev_text.replace(k,v);
+                            opt.next_text = opt.next_text.replace(k,v);
+                        })
+                        return opt;
+                    }
+                },
+                error:function(){
+                    alert("error!");
+                }
+            });
+        }
+    });
+    $("#contenteventsearch input, #contenteventsearch select").change(function() {
+        var sorttype ='';
+        var searchtext_temp='';
+        var subtreearray='';
+        var fromDate='';
+        var toDate='';
+        var event_city='';
+        var free_event='';
+        var long_event='';
+        var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
+
+        $.each(facetlist_temp,function(i,fd)
+        {
+            if(fd.name=='sort_type'){
+                sorttype=fd.value;
+            }else if(fd.name=='SearchText'){
+                searchtext_temp=fd.value;
+            }else if(fd.name=='SubTreeArray'){
+                subtreearray=fd.value;
+            }else if(fd.name=='fromDate'){
+                fromDate=fd.value;
+            }else if(fd.name=='toDate'){
+                toDate=fd.value;
+            }else if(fd.name=='event_city'){
+                event_city=fd.value;
+            }else if(fd.name=='free_event'){
+                free_event=fd.value;
+            }else if(fd.name=='long_event'){
+                long_event=fd.value;
+            }
+         });
+        var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+        var url = '/update/searchevent';
+        $("#search_results").children().remove();
+        $("#search_results").addClass("is_loading");
+        var aj=$.ajax({
+            url:url,
+            data:(param),
+            type:'POST',
+            dataType:'json',
+            success:function(data){
+                var today1 = $.datejava(new Date().getTime());
+                var tomorrow1 = $.datejava(new Date().getTime() + 3600*24*1000);
+                $("#search_results").removeClass("is_loading");
+                for (var i in data)
+                {
+                    if(i == 'result_nummer')
+                    {
+                        $('.search_result_number_line .result_numer').html(data[i]);
+                        var optInit = getOptionsFromForm();
+                        $("#Pagination").pagination(data[i], optInit);
+                    }
+                }
+                
+                function pageselectCallback(page_index, jq){
+                    var items_per_page = $('#items_per_page').val();
+                    var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
+                    var newcontent = '';
+                    var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                                  'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
+                                  'sort_type':sorttype,'offset':page_index};
+                    if(page_index >= 1)
+                    {
+                        $("#search_results").addClass("is_loading");
+                        $("#search_results").children().remove();
+                        var ajx=$.ajax({
+                            url:url,
+                            data:(params),
+                            type:'POST',
+                            dataType:'json',
+                            success:function(datas){ 
+                                var max_elems = Math.min((page_index+1) * items_per_page, datas.facet_list.length);
+                                for(var i=0;i<max_elems;i++)
+                                {
+                                    var today2=$.date(datas.facet_list[i][0]);
+                                    var mark= datas.facet_list[i][2];
+                                    if(today1 == today2 && mark == 0)
+                                    {
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                    }else if(tomorrow1 == today2 && mark == 0){
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                    }else if(mark == 0){
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
+                                    }
+                                    newcontent += datas.facet_list[i][1];
+                                }
+                                $("#search_results").removeClass("is_loading");
+                                $('#search_results').append(newcontent);
+                                $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                                $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                            },
+                            error:function(){
+                                alert("error page!");
+                            } });
+                    }else{
+                        for(var i=page_index*items_per_page;i<max_elem;i++)
+                        {
+                            var today2=$.date(data.facet_list[i][0]);
+                            var mark= data.facet_list[i][2];
+                            if(today1 == today2 && mark == 0)
+                            {
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                            }else if(tomorrow1 == today2 && mark == 0){
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                            }else if(mark == 0){
+                                newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
+                            }
+                            newcontent += data.facet_list[i][1];
+                        }
+                        $("#search_results").removeClass("is_loading");
+                        $("#search_results").children().remove();
+                        $('#search_results').append(newcontent);
+                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                    }
+                    return false;
+                }
+                function getOptionsFromForm(){
+                    var opt = {callback: pageselectCallback};
+                    $("input:text").each(function(){
+                        opt[this.name] = this.className.match(/numeric/) ? parseInt(this.value) : this.value;
+                    });
+                    var htmlspecialchars ={ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;"}
+                    $.each(htmlspecialchars, function(k,v){
+                        opt.prev_text = opt.prev_text.replace(k,v);
+                        opt.next_text = opt.next_text.replace(k,v);
+                    })
+                    return opt;
+                }
+            },
+            error:function(){
+                alert("error!");
+            }
+        });
+    });
+    $("#contenteventsearch .submitbutton").click(function(){
+        var sorttype ='';
+        var searchtext_temp='';
+        var subtreearray='';
+        var fromDate='';
+        var toDate='';
+        var event_city='';
+        var free_event='';
+        var long_event='';
+        var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
+
+        $.each(facetlist_temp,function(i,fd)
+        {
+            if(fd.name=='sort_type'){
+                sorttype=fd.value;
+            }else if(fd.name=='SearchText'){
+                searchtext_temp=fd.value;
+            }else if(fd.name=='SubTreeArray'){
+                subtreearray=fd.value;
+            }else if(fd.name=='fromDate'){
+                fromDate=fd.value;
+            }else if(fd.name=='toDate'){
+                toDate=fd.value;
+            }else if(fd.name=='event_city'){
+                event_city=fd.value;
+            }else if(fd.name=='free_event'){
+                free_event=fd.value;
+            }else if(fd.name=='long_event'){
+                long_event=fd.value;
+            }
+         });
+        var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+        var url = '/update/searchevent';
+        $("#search_results").children().remove();
+        $("#search_results").addClass("is_loading");
+        var aj=$.ajax({
+            url:url,
+            data:(param),
+            type:'POST',
+            dataType:'json',
+            success:function(data){
+                var today1 = $.datejava(new Date().getTime());
+                var tomorrow1 = $.datejava(new Date().getTime() + 3600*24*1000);
+                $("#search_results").removeClass("is_loading");
+                for (var i in data)
+                {
+                    if(i == 'result_nummer')
+                    {
+                        $('.search_result_number_line .result_numer').html(data[i]);
+                        var optInit = getOptionsFromForm();
+                        $("#Pagination").pagination(data[i], optInit);
+                    }
+                }
+                
+                function pageselectCallback(page_index, jq){
+                    var items_per_page = $('#items_per_page').val();
+                    var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
+                    var newcontent = '';
+                    var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
+                                  'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
+                                  'sort_type':sorttype,'offset':page_index};
+                    if(page_index >= 1)
+                    {
+                        $("#search_results").addClass("is_loading");
+                        $("#search_results").children().remove();
+                        var ajx=$.ajax({
+                            url:url,
+                            data:(params),
+                            type:'POST',
+                            dataType:'json',
+                            success:function(datas){ 
+                                var max_elems = Math.min((page_index+1) * items_per_page, datas.facet_list.length);
+                                for(var i=0;i<max_elems;i++)
+                                {
+                                    var today2=$.date(datas.facet_list[i][0]);
+                                    var mark= datas.facet_list[i][2];
+                                    if(today1 == today2 && mark == 0)
+                                    {
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                    }else if(tomorrow1 == today2 && mark == 0){
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                    }else if(mark == 0){
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
+                                    }
+                                    newcontent += datas.facet_list[i][1];
+                                }
+                                $("#search_results").removeClass("is_loading");
+                                $('#search_results').append(newcontent);
+                                $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                                $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                            },
+                            error:function(){
+                                alert("error page!");
+                            } });
+                    }else{
+                        for(var i=page_index*items_per_page;i<max_elem;i++)
+                        {
+                            var today2=$.date(data.facet_list[i][0]);
+                            var mark= data.facet_list[i][2];
+                            if(today1 == today2 && mark == 0)
+                            {
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                            }else if(tomorrow1 == today2 && mark == 0){
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                            }else if(mark == 0){
+                                newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
+                            }
+                            newcontent += data.facet_list[i][1];
+                        }
+                        $("#search_results").removeClass("is_loading");
+                        $("#search_results").children().remove();
+                        $('#search_results').append(newcontent);
+                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
+                    }
+                    return false;
+                }
+                function getOptionsFromForm(){
+                    var opt = {callback: pageselectCallback};
+                    $("input:text").each(function(){
+                        opt[this.name] = this.className.match(/numeric/) ? parseInt(this.value) : this.value;
+                    });
+                    var htmlspecialchars ={ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;"}
+                    $.each(htmlspecialchars, function(k,v){
+                        opt.prev_text = opt.prev_text.replace(k,v);
+                        opt.next_text = opt.next_text.replace(k,v);
+                    })
+                    return opt;
+                }
+            },
+            error:function(){
+                alert("error!");
+            }
+        });
+    });
 });
+/*events search end*/
 var initDate = function(element) {
     element.datepicker({
         beforeShow: function() {

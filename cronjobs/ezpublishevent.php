@@ -14,7 +14,7 @@ eZUser::setCurrentlyLoggedInUser( $user, $userCreatorID );
 
 // remove all rows from SOLR where NodeID is Events
 $ezpevent_ini = eZINI::instance( 'ezpublishevent.ini' );
-$parentNodeID = $ezpevent_ini->variable( 'CronjobSettings', 'ParentNodeID' );
+$parentNodeID = $ezpevent_ini->variable( 'Settings', 'ParentNodeID' );
 $classIdentifier = $ezpevent_ini->variable( 'Settings', 'EventClassIdentifier' );
 $limit = 500;
 $offset = 0;
