@@ -138,6 +138,8 @@ jQuery(document).ready(function() {
                 }
                 
                 function pageselectCallback(page_index, jq){
+                    $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                    $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                     var items_per_page = $('#items_per_page').val();
                     var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
                     var newcontent = '';
@@ -145,7 +147,11 @@ jQuery(document).ready(function() {
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
                                   'sort_type':sorttype,'offset':page_index};
                     if(page_index >= 1)
-                    {
+                    {   
+                        $("#Pagination .prev img").remove();
+                        $("#Pagination .next img").remove();
+                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                         $("#search_results").addClass("is_loading");
                         $("#search_results").children().remove();
                         var ajx=$.ajax({
@@ -170,9 +176,8 @@ jQuery(document).ready(function() {
                                     newcontent += datas.facet_list[i][1];
                                 }
                                 $("#search_results").removeClass("is_loading");
+                                $("#search_results").children().remove();
                                 $('#search_results').append(newcontent);
-                                $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                                $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                             },
                             error:function(){
                                 alert("error page!");
@@ -195,8 +200,6 @@ jQuery(document).ready(function() {
                         $("#search_results").removeClass("is_loading");
                         $("#search_results").children().remove();
                         $('#search_results').append(newcontent);
-                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                     }
                     return false;
                 }
@@ -277,6 +280,8 @@ jQuery(document).ready(function() {
                     }
                     
                     function pageselectCallback(page_index, jq){
+                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                         var items_per_page = $('#items_per_page').val();
                         var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
                         var newcontent = '';
@@ -284,7 +289,11 @@ jQuery(document).ready(function() {
                                       'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
                                       'sort_type':sorttype,'offset':page_index};
                         if(page_index >= 1)
-                        {
+                        {   
+                            $("#Pagination .prev img").remove();
+                            $("#Pagination .next img").remove();
+                            $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                            $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                             $("#search_results").addClass("is_loading");
                             $("#search_results").children().remove();
                             var ajx=$.ajax({
@@ -309,9 +318,8 @@ jQuery(document).ready(function() {
                                         newcontent += datas.facet_list[i][1];
                                     }
                                     $("#search_results").removeClass("is_loading");
+                                    $("#search_results").children().remove();
                                     $('#search_results').append(newcontent);
-                                    $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                                    $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                                 },
                                 error:function(){
                                     alert("error page!");
@@ -334,8 +342,6 @@ jQuery(document).ready(function() {
                             $("#search_results").removeClass("is_loading");
                             $("#search_results").children().remove();
                             $('#search_results').append(newcontent);
-                            $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                            $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                         }
                         return false;
                     }
@@ -414,6 +420,8 @@ jQuery(document).ready(function() {
                 }
                 
                 function pageselectCallback(page_index, jq){
+                    $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                    $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                     var items_per_page = $('#items_per_page').val();
                     var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
                     var newcontent = '';
@@ -421,7 +429,11 @@ jQuery(document).ready(function() {
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
                                   'sort_type':sorttype,'offset':page_index};
                     if(page_index >= 1)
-                    {
+                    {   
+                        $("#Pagination .prev img").remove();
+                        $("#Pagination .next img").remove();
+                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                         $("#search_results").addClass("is_loading");
                         $("#search_results").children().remove();
                         var ajx=$.ajax({
@@ -446,9 +458,8 @@ jQuery(document).ready(function() {
                                     newcontent += datas.facet_list[i][1];
                                 }
                                 $("#search_results").removeClass("is_loading");
+                                $("#search_results").children().remove();
                                 $('#search_results').append(newcontent);
-                                $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                                $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                             },
                             error:function(){
                                 alert("error page!");
@@ -471,8 +482,6 @@ jQuery(document).ready(function() {
                         $("#search_results").removeClass("is_loading");
                         $("#search_results").children().remove();
                         $('#search_results').append(newcontent);
-                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                     }
                     return false;
                 }
@@ -550,6 +559,8 @@ jQuery(document).ready(function() {
                 }
                 
                 function pageselectCallback(page_index, jq){
+                    $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                    $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                     var items_per_page = $('#items_per_page').val();
                     var max_elem = Math.min((page_index+1) * items_per_page, data.facet_list.length);
                     var newcontent = '';
@@ -557,7 +568,11 @@ jQuery(document).ready(function() {
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
                                   'sort_type':sorttype,'offset':page_index};
                     if(page_index >= 1)
-                    {
+                    {   
+                        $("#Pagination .prev img").remove();
+                        $("#Pagination .next img").remove();
+                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
+                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                         $("#search_results").addClass("is_loading");
                         $("#search_results").children().remove();
                         var ajx=$.ajax({
@@ -582,9 +597,8 @@ jQuery(document).ready(function() {
                                     newcontent += datas.facet_list[i][1];
                                 }
                                 $("#search_results").removeClass("is_loading");
+                                $("#search_results").children().remove();
                                 $('#search_results').append(newcontent);
-                                $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                                $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                             },
                             error:function(){
                                 alert("error page!");
@@ -607,8 +621,6 @@ jQuery(document).ready(function() {
                         $("#search_results").removeClass("is_loading");
                         $("#search_results").children().remove();
                         $('#search_results').append(newcontent);
-                        $("#Pagination .prev").prepend('<img src="/extension/hannover/design/hannover/images/reverse_arrow.png">&nbsp;');
-                        $("#Pagination .next").append('&nbsp;<img src="/extension/hannover/design/hannover/images/li_icon.png">');
                     }
                     return false;
                 }
