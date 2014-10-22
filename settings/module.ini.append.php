@@ -3,5 +3,5 @@
 [ModuleSettings]
 ExtensionRepositories[]=ezpublish-event
 ModuleList[]=event
-
+ModuleList[]=update
 */ ?>
