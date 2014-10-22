@@ -74,7 +74,6 @@ if( $http->hasVariable('sort_type'))
     $sort_type = $http->variable('sort_type');
 }else{
     $sort_type="event/date";
-    //$sort_type="score";
 }
 
 if( $http->hasVariable('offset') && $http->hasVariable('offset')!="")
@@ -87,10 +86,7 @@ if( $http->hasVariable('offset') && $http->hasVariable('offset')!="")
 
 $client = eZPublishSolarium::createSolariumClient();
 $query = $client->createSelect();
-/*
-$startDateTs =1413504000;
-$endDateTs=1413590400;
-*/
+
 if($sort_type == "event/date")
 {
     $helper = $query->getHelper();
@@ -107,7 +103,7 @@ if($sort_type == "event/date")
     $query->setStart($Offset)->setRows($limit);
     $query->setFields(array('meta_id_si','attr_currentday_dt'));
     $query->addSort('attr_currentday_dt', Solarium_Query_Select::SORT_ASC);
-    
+    $query->addSort('attr_start_dt', Solarium_Query_Select::SORT_DESC);
     $resultset = $client->select($query);
     $sum_nr=$resultset->getNumFound();
     $template_array=array();
