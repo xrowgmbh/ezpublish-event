@@ -103,7 +103,8 @@ if($sort_type == "event/date")
     $query->setStart($Offset)->setRows($limit);
     $query->setFields(array('meta_id_si','attr_currentday_dt'));
     $query->addSort('attr_currentday_dt', Solarium_Query_Select::SORT_ASC);
-    $query->addSort('attr_start_dt', Solarium_Query_Select::SORT_DESC);
+    $query->addSort('attr_currentday_with_time_dt', Solarium_Query_Select::SORT_ASC);
+    
     $resultset = $client->select($query);
     $sum_nr=$resultset->getNumFound();
     $template_array=array();

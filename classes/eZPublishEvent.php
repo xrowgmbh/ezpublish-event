@@ -3,7 +3,7 @@
 class eZPublishEvent
 {
     const DATE_FORMAT = DateTime::ISO8601;
-    const DATE_FORMAT_SOLR = 'Y-m-d\TH:i:s\Z';
+    const DATE_FORMAT_SOLR = 'Y-m-d\TH:i:s.000\Z';
     static private $currentDateFormat = null;
     private $FindINI = null;
     private $eZPEventINI = null;
@@ -179,13 +179,15 @@ class eZPublishEvent
                         $starttime = new DateTime();
                         $starttime->setTimestamp( $ezpeventItem['starttime'] );
                         $defaultData['attr_start_dt'] = $starttime->format( self::DATE_FORMAT_SOLR );
+                        $start_time_temp=explode("T",$starttime->format( self::DATE_FORMAT_SOLR ));
+                        $start_time = $start_time_temp[1];
                         $start_0=$starttime->setTime( 0,0,0 );
                         $start = $start_0->getTimestamp();
                         $endtime = new DateTime();
                         $endtime->setTimestamp( $ezpeventItem['endtime'] );
                         $defaultData['attr_end_dt'] = $endtime->format( self::DATE_FORMAT_SOLR );
                         $end_0=$endtime->setTime( 0,0,0 );
-                        $end = $endtime->getTimestamp();
+                        $end = $end_0->getTimestamp();
                         // check all days
                         for( $day = $start; $day <= $end; $day = $day+86400 )
                         {
@@ -197,6 +199,9 @@ class eZPublishEvent
                                     $daytime = new DateTime();
                                     $daytime->setTimestamp( $day );
                                     $defaultData['attr_currentday_dt'] = $daytime->format( self::DATE_FORMAT_SOLR );
+                                    $current_day_temp=explode("T",$daytime->format( self::DATE_FORMAT_SOLR ));
+                                    $current_day= $current_day_temp[0]."T".$start_time;
+                                    $defaultData['attr_currentday_with_time_dt'] = $current_day;
                                     $defaultData['meta_guid_ms']= $contentObject->attribute( 'remote_id' )."::".$daytime->format( self::DATE_FORMAT_SOLR );
                                     foreach( $defaultData as $defaultDataName => $defaultDataItem )
                                     {
