@@ -202,9 +202,34 @@ if( $deleteFields !== false && $deleteFields != '' )
         $class = eZContentClass::fetchByIdentifier( $classidentifier );
         foreach( $deleteFieldsArray as $deleteField )
         {
-            $deleteAttributes[] = $class->fetchAttributeByIdentifier( $deleteField );
+            //$deleteAttributes[] = $class->fetchAttributeByIdentifier( $deleteField );
+            
+            $classAttributeIdentifier = $deleteField;
+            // get attributes of 'temporary' version as well
+            $classAttributeList = eZContentClassAttribute::fetchFilteredList( array(
+                    'contentclass_id' => $class->ID ,
+                    'identifier' => $classAttributeIdentifier
+            ), true );
+
+            foreach ( $classAttributeList as $classAttribute )
+            {
+                $dataType = $classAttribute->dataType();
+                if ( $dataType->isClassAttributeRemovable( $classAttribute ) )
+                {
+                    $objectAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $classAttribute->attribute( 'id' ) );
+                    foreach ( $objectAttributes as $objectAttribute )
+                    {
+                        $objectAttributeID = $objectAttribute->attribute( 'id' );
+                        $objectAttribute->removeThis( $objectAttributeID );
+                    }
+                    $classAttribute->removeThis();
+                }
+                else
+                {
+                    $removeInfo = $dataType->classAttributeRemovableInformation( $classAttribute );
+                }
+            }
         }
-        $cli->output( "ES WURDE NICHT GELÖSCHT, WEIL DER BEFEHL DEAKTIVIERT IST" );
-        #$class->removeAttributes( $deleteAttributes );
+        $cli->output( "removed $deleteFields" );
     }
 }
