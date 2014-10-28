@@ -127,14 +127,14 @@ if(isset($classidentifier))
                                 $startfield = $options[ 'startfield' ];
                             else
                             {
-                                $cli->error( "startfield have to be the start date" );
+                                $cli->error( "startfield has to be the start date" );
                                 $script->shutdown( 1 );
                             }
                             if( strpos( 'end', $options['endfield'] ) !== false )
                                 $endfield = $options[ 'endfield' ];
                             else
                             {
-                                $cli->error( "endfield have to be the end date" );
+                                $cli->error( "endfield has to be the end date" );
                                 $script->shutdown( 1 );
                             }
                         }
