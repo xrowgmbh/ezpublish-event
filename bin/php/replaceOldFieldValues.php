@@ -206,11 +206,34 @@ if(isset($classidentifier))
                 if( is_array( $deleteFieldsArray ) && count( $deleteFieldsArray ) > 0 )
                 {
                     $deleteAttributes = array();
-                    foreach( $deleteFieldsArray as $deleteField )
+                    foreach( $deleteFieldsArray as $classAttributeIdentifier )
                     {
-                        $deleteAttributes[] = $class->fetchAttributeByIdentifier( $deleteField );
+                        // get attributes of 'temporary' version as well
+                        $classAttributeList = eZContentClassAttribute::fetchFilteredList( array(
+                                'contentclass_id' => $class->ID ,
+                                'identifier' => $classAttributeIdentifier
+                        ), true );
+
+                        foreach ( $classAttributeList as $classAttribute )
+                        {
+                            $dataType = $classAttribute->dataType();
+                            if ( $dataType->isClassAttributeRemovable( $classAttribute ) )
+                            {
+                                $objectAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $classAttribute->attribute( 'id' ) );
+                                foreach ( $objectAttributes as $objectAttribute )
+                                {
+                                    $objectAttributeID = $objectAttribute->attribute( 'id' );
+                                    $objectAttribute->removeThis( $objectAttributeID );
+                                }
+                                $classAttribute->removeThis();
+                            }
+                            else
+                            {
+                                $removeInfo = $dataType->classAttributeRemovableInformation( $classAttribute );
+                            }
+                        }
                     }
-                    $class->removeAttributes( $deleteAttributes );
+                    $cli->output( "removed $deleteFields" );
                 }
             }
         }
