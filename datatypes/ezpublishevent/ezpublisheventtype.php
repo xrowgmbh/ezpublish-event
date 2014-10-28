@@ -39,7 +39,6 @@ class eZPublishEventType extends eZDataType
                             try
                             {
                                 $starttime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'start', $contentObjectAttribute->LanguageCode );
-                                #die(var_dump($starttime));
                                 $validate = $this->validateDateTime( $now, $starttime );
                                 if( isset( $validate['state'] ) )
                                 {
@@ -116,17 +115,8 @@ class eZPublishEventType extends eZDataType
                                 $validate = $this->validateDateTime( $now, $starttimeExc );
                                 if( isset( $validate['state'] ) )
                                 {
-                                    if( isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) != '' )
-                                    {
-                                        $timeString = trim( $excludeItem['enddate'] ) . ' 00';
-                                        $endtimeExc = eZPublishEvent::createDateTime( $timeString, null, 'end', $contentObjectAttribute->LanguageCode );
-                                    }
-                                    else
-                                    {
-                                        $endtimeExc = clone $starttimeExc;
-                                        $endtimeExc->modify( '+1 day' );
-                                        $endtimeExc->setTime( 00, 00 );
-                                    }
+                                    $timeString = trim( $excludeItem['enddate'] ) . ' 00';
+                                    $endtimeExc = eZPublishEvent::createDateTime( $timeString, null, 'end', $contentObjectAttribute->LanguageCode );
                                     $validate = $this->validateDateTime( $now, $starttimeExc, $endtimeExc );
                                     if( isset( $validate['state'] ) )
                                     {
@@ -182,7 +172,8 @@ class eZPublishEventType extends eZDataType
     {
         $locale = $contentObjectAttribute->LanguageCode;
         $contentTmp = json_decode( $contentObjectAttribute->attribute( 'data_text' ) );
-        $content = array( 'json' => array() );
+        $content = array( 'json' => array(), 
+                          'perioddetails' => array() );
         if( isset( $contentTmp->include ) && count( $contentTmp->include ) > 0 )
         {
             $include = array();
@@ -248,9 +239,9 @@ class eZPublishEventType extends eZDataType
         return $content;
     }
 
-    /*!
-     Returns the meta data used for storing search indeces.
-    */
+    /*
+     * Returns the meta data used for storing search indeces.
+     */
     function metaData( $contentObjectAttribute )
     {
         $content = $this->objectAttributeContent( $this );
@@ -262,14 +253,23 @@ class eZPublishEventType extends eZDataType
         return $contentObjectAttribute->attribute( "data_text" ) != '';
     }
 
+    /*
+     * Return string representation of an contentobjectattribute data for simplified export
+     */
+    function toString( $contentObjectAttribute )
+    {
+        return $contentObjectAttribute->attribute( 'data_text' );
+    }
+
     function validateDateTime( $now, $checktime1, $checktime2 = false )
     {
         if( $checktime1 instanceof DateTime && ( $checktime2 === false || ( $checktime2 !== false && $checktime2 instanceof DateTime ) ) )
         {
-            if( $checktime2 === false && $checktime1->getTimestamp() < $now )
-            {
-                return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Select a start date in the future.' ) );
-            }
+            // validation for start time in the future disabled because you should change content of an event during the whole period
+            #if( $checktime2 === false && $checktime1->getTimestamp() < $now )
+            #{
+            #    return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Select a start date in the future.' ) );
+            #}
             if( $checktime2 !== false )
             {
                 if( $checktime2->getTimestamp() < $now )

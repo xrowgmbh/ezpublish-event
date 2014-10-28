@@ -206,34 +206,11 @@ if(isset($classidentifier))
                 if( is_array( $deleteFieldsArray ) && count( $deleteFieldsArray ) > 0 )
                 {
                     $deleteAttributes = array();
-                    foreach( $deleteFieldsArray as $classAttributeIdentifier )
+                    foreach( $deleteFieldsArray as $deleteField )
                     {
-                        // get attributes of 'temporary' version as well
-                        $classAttributeList = eZContentClassAttribute::fetchFilteredList( array(
-                                'contentclass_id' => $class->ID ,
-                                'identifier' => $classAttributeIdentifier
-                        ), true );
-
-                        foreach ( $classAttributeList as $classAttribute )
-                        {
-                            $dataType = $classAttribute->dataType();
-                            if ( $dataType->isClassAttributeRemovable( $classAttribute ) )
-                            {
-                                $objectAttributes = eZContentObjectAttribute::fetchSameClassAttributeIDList( $classAttribute->attribute( 'id' ) );
-                                foreach ( $objectAttributes as $objectAttribute )
-                                {
-                                    $objectAttributeID = $objectAttribute->attribute( 'id' );
-                                    $objectAttribute->removeThis( $objectAttributeID );
-                                }
-                                $classAttribute->removeThis();
-                            }
-                            else
-                            {
-                                $removeInfo = $dataType->classAttributeRemovableInformation( $classAttribute );
-                            }
-                        }
+                        $deleteAttributes[] = $class->fetchAttributeByIdentifier( $deleteField );
                     }
-                    $cli->output( "removed $deleteFields" );
+                    $class->removeAttributes( $deleteAttributes );
                 }
             }
         }

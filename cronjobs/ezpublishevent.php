@@ -14,11 +14,13 @@ eZUser::setCurrentlyLoggedInUser( $user, $userCreatorID );
 
 // remove all rows from SOLR where NodeID is Events
 $ezpevent_ini = eZINI::instance( 'ezpublishevent.ini' );
-$parentNodeID = $ezpevent_ini->variable( 'CronjobSettings', 'ParentNodeID' );
+$parentNodeID = $ezpevent_ini->variable( 'Settings', 'ParentNodeID' );
 $classIdentifier = $ezpevent_ini->variable( 'Settings', 'EventClassIdentifier' );
 $limit = 500;
 $offset = 0;
-$clearIndex = true;
+
+####### WICHTIG: wenn das auf true ist, wird der ganze SOLR-Index entfernt
+$clearIndex = false;
 
 // execute the ping query
 try

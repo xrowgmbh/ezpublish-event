@@ -9,7 +9,7 @@ class eZPublishSolarium
         if( self::$solariumClient === null )
         {
             $solrINI = eZINI::instance( 'solr.ini' );
-            $solrURL = $solrINI->variable( 'SolrBase', 'SearchServerURI' );
+            $solrURL = $solrINI->variable( 'SolrBaseEvents', 'SearchServerURI' );
             $url = new ezcUrl( $solrURL );
             $config = array(
                     'adapteroptions' => array(

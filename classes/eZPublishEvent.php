@@ -3,7 +3,7 @@
 class eZPublishEvent
 {
     const DATE_FORMAT = DateTime::ISO8601;
-    const DATE_FORMAT_SOLR = 'Y-m-d\TH:i:s\Z';
+    const DATE_FORMAT_SOLR = 'Y-m-d\TH:i:s.000\Z';
     static private $currentDateFormat = null;
     private $FindINI = null;
     private $eZPEventINI = null;
@@ -69,6 +69,8 @@ class eZPublishEvent
         $attributeName = $this->eZPEventINI->variable( 'Settings', 'AttributeName' );
         $fieldsForSOLRIndex = $this->eZPEventINI->variable( 'CronjobSettings', 'FieldsForSOLRIndex' );
         $dataMap = $node->dataMap();
+        $long_date=$dataMap["long_dated"];
+        $prices_string = $dataMap["gratis"];
         if( isset( $dataMap[$attributeName] ) )
         {
             $ezpevent = $dataMap[$attributeName];
@@ -81,13 +83,17 @@ class eZPublishEvent
 
                 // Loop over each language version and create an eZSolrDoc for it
                 #foreach ( $availableLanguages as $languageCode )
-                #{
+                #{ 
+                
                 $languageCode = 'ger-DE';
                 $parent = $node->fetchParent();
                 $defaultData = array( 'attr_name_t' => $contentObject->name( false, $languageCode ),
                                       'meta_id_si' => $contentObject->ID,
                                       'meta_url_alias_ms' => $node->attribute( 'url_alias' ),
-                                      'meta_main_parent_node_id_si' => $parent->NodeID );
+                                      'meta_main_parent_node_id_si' => $parent->NodeID ,
+                                      'meta_path_si' => array_map('intval',explode('/',$node->PathString)),
+                                      'attr_prices_t'=> $prices_string->DataInt,
+                                      'attr_long_date_b'=> $long_date->DataInt);
 
                 /*if( !$node->isMain() )
                 {
@@ -173,13 +179,15 @@ class eZPublishEvent
                         $starttime = new DateTime();
                         $starttime->setTimestamp( $ezpeventItem['starttime'] );
                         $defaultData['attr_start_dt'] = $starttime->format( self::DATE_FORMAT_SOLR );
-                        $starttime->setTime( 00, 00 );
-                        $start = $starttime->getTimestamp();
+                        $start_time_temp=explode("T",$starttime->format( self::DATE_FORMAT_SOLR ));
+                        $start_time = $start_time_temp[1];
+                        $start_0=$starttime->setTime( 0,0,0 );
+                        $start = $start_0->getTimestamp();
                         $endtime = new DateTime();
                         $endtime->setTimestamp( $ezpeventItem['endtime'] );
                         $defaultData['attr_end_dt'] = $endtime->format( self::DATE_FORMAT_SOLR );
-                        $endtime->setTime( 00, 00 );
-                        $end = $endtime->getTimestamp();
+                        $end_0=$endtime->setTime( 0,0,0 );
+                        $end = $end_0->getTimestamp();
                         // check all days
                         for( $day = $start; $day <= $end; $day = $day+86400 )
                         {
@@ -191,6 +199,9 @@ class eZPublishEvent
                                     $daytime = new DateTime();
                                     $daytime->setTimestamp( $day );
                                     $defaultData['attr_currentday_dt'] = $daytime->format( self::DATE_FORMAT_SOLR );
+                                    $current_day_temp=explode("T",$daytime->format( self::DATE_FORMAT_SOLR ));
+                                    $current_day= $current_day_temp[0]."T".$start_time;
+                                    $defaultData['attr_currentday_with_time_dt'] = $current_day;
                                     $defaultData['meta_guid_ms']= $contentObject->attribute( 'remote_id' )."::".$daytime->format( self::DATE_FORMAT_SOLR );
                                     foreach( $defaultData as $defaultDataName => $defaultDataItem )
                                     {
