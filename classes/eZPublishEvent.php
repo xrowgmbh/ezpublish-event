@@ -181,12 +181,12 @@ class eZPublishEvent
                         $defaultData['attr_start_dt'] = $starttime->format( self::DATE_FORMAT_SOLR );
                         $start_time_temp=explode("T",$starttime->format( self::DATE_FORMAT_SOLR ));
                         $start_time = $start_time_temp[1];
-                        $start_0=$starttime->setTime( 0,0,0 );
+                        $start_0=$starttime->setTime(0,0);
                         $start = $start_0->getTimestamp();
                         $endtime = new DateTime();
                         $endtime->setTimestamp( $ezpeventItem['endtime'] );
                         $defaultData['attr_end_dt'] = $endtime->format( self::DATE_FORMAT_SOLR );
-                        $end_0=$endtime->setTime( 0,0,0 );
+                        $end_0=$endtime->setTime(0,0);
                         $end = $end_0->getTimestamp();
                         // check all days
                         for( $day = $start; $day <= $end; $day = $day+86400 )
@@ -198,9 +198,10 @@ class eZPublishEvent
                                     $doc = $update->createDocument();
                                     $daytime = new DateTime();
                                     $daytime->setTimestamp( $day );
-                                    $defaultData['attr_currentday_dt'] = $daytime->format( self::DATE_FORMAT_SOLR );
                                     $current_day_temp=explode("T",$daytime->format( self::DATE_FORMAT_SOLR ));
                                     $current_day= $current_day_temp[0]."T".$start_time;
+                                    $current_day_zero=$current_day_temp[0]."T00:00:00Z";
+                                    $defaultData['attr_currentday_dt'] = $current_day_zero;
                                     $defaultData['attr_currentday_with_time_dt'] = $current_day;
                                     $defaultData['meta_guid_ms']= $contentObject->attribute( 'remote_id' )."::".$daytime->format( self::DATE_FORMAT_SOLR );
                                     foreach( $defaultData as $defaultDataName => $defaultDataItem )

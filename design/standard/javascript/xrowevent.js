@@ -167,9 +167,9 @@ jQuery(document).ready(function() {
                                     var mark= datas.facet_list[i][2];
                                     if(today1 == today2 && mark == 0)
                                     {
-                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                     }else if(tomorrow1 == today2 && mark == 0){
-                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                     }else if(mark == 0){
                                         newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
                                     }
@@ -189,9 +189,9 @@ jQuery(document).ready(function() {
                             var mark= data.facet_list[i][2];
                             if(today1 == today2 && mark == 0)
                             {
-                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                             }else if(tomorrow1 == today2 && mark == 0){
-                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                             }else if(mark == 0){
                                 newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
                             }
@@ -309,9 +309,9 @@ jQuery(document).ready(function() {
                                         var mark= datas.facet_list[i][2];
                                         if(today1 == today2 && mark == 0)
                                         {
-                                            newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                            newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                         }else if(tomorrow1 == today2 && mark == 0){
-                                            newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                            newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                         }else if(mark == 0){
                                             newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
                                         }
@@ -331,9 +331,9 @@ jQuery(document).ready(function() {
                                 var mark= data.facet_list[i][2];
                                 if(today1 == today2 && mark == 0)
                                 {
-                                    newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                    newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                                 }else if(tomorrow1 == today2 && mark == 0){
-                                    newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                    newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                                 }else if(mark == 0){
                                     newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
                                 }
@@ -449,9 +449,9 @@ jQuery(document).ready(function() {
                                     var mark= datas.facet_list[i][2];
                                     if(today1 == today2 && mark == 0)
                                     {
-                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                     }else if(tomorrow1 == today2 && mark == 0){
-                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                     }else if(mark == 0){
                                         newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
                                     }
@@ -471,9 +471,9 @@ jQuery(document).ready(function() {
                             var mark= data.facet_list[i][2];
                             if(today1 == today2 && mark == 0)
                             {
-                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                             }else if(tomorrow1 == today2 && mark == 0){
-                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                             }else if(mark == 0){
                                 newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
                             }
@@ -588,9 +588,9 @@ jQuery(document).ready(function() {
                                     var mark= datas.facet_list[i][2];
                                     if(today1 == today2 && mark == 0)
                                     {
-                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                     }else if(tomorrow1 == today2 && mark == 0){
-                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(datas.facet_list[i][0])+')</h1>';
+                                        newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(datas.facet_list[i][0])+')</h1>';
                                     }else if(mark == 0){
                                         newcontent +='<h1 style="margin-bottom:0;">'+$.date(datas.facet_list[i][0])+'</h1>';
                                     }
@@ -610,9 +610,9 @@ jQuery(document).ready(function() {
                             var mark= data.facet_list[i][2];
                             if(today1 == today2 && mark == 0)
                             {
-                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#today_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                             }else if(tomorrow1 == today2 && mark == 0){
-                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+'('+$.date(data.facet_list[i][0])+')</h1>';
+                                newcontent +='<h1 style="margin-bottom:0;">'+$("#tomorrow_text").val()+' ('+$.date(data.facet_list[i][0])+')</h1>';
                             }else if(mark == 0){
                                 newcontent +='<h1 style="margin-bottom:0;">'+$.date(data.facet_list[i][0])+'</h1>';
                             }
