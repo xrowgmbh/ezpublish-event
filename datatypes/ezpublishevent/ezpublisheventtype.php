@@ -26,7 +26,7 @@ class eZPublishEventType extends eZDataType
             $exclude = array();
             $days = array();
             // get include date
-            if( isset($data['include'] ) )
+            if( isset( $data['include'] ) )
             {
                 foreach( $data['include'] as $key => $includeItem )
                 {
@@ -170,7 +170,6 @@ class eZPublishEventType extends eZDataType
     */
     function objectAttributeContent( $contentObjectAttribute )
     {
-        $locale = $contentObjectAttribute->LanguageCode;
         $contentTmp = json_decode( $contentObjectAttribute->attribute( 'data_text' ) );
         $content = array( 'json' => array(), 
                           'perioddetails' => array() );
@@ -300,11 +299,6 @@ class eZPublishEventType extends eZDataType
             }
         }
         return array( 'state' => true );
-    }
-
-    function sortKeyType()
-    {
-        return 'int';
     }
 }
 
