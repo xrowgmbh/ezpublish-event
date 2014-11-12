@@ -27,9 +27,7 @@
 {ezscript_require(array('ezjsc::jqueryUI', 'xrowevent.js'))}
 <input type="hidden" class="ezpevent" id="ezpevent{$attribute.id}" data-attrid="{$attribute.id}" data-locale="{$locale.http_locale_code|extract(0,2)}" />
 <input type="hidden" value="{$locale.http_locale_code|extract(0,2)}" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[locale]" class="ezpeventdate_data_locale" />
-<span style="display: none">
-    {$content.perioddetails.firststartdate|l10n( 'shortdate' )} :: {$content.perioddetails.lastenddate|l10n( 'shortdate' )}
-</span>
+<input type="hidden" value="{$attribute.id}" name="ezpeventdate_attr_id" />
 <fieldset>
     <legend>{'Periods'|i18n( 'extension/ezpublish-event' )}</legend>
 {if is_set( $postInclude )}

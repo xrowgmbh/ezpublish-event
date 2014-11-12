@@ -5,7 +5,7 @@
 {/if}
 {if is_set( $item.endtime )}
 {def $enddate = $item.endtime|datetime( 'custom', $dateFormat )}
-{else is_set( $item.enddate )}
+{elseif is_set( $item.enddate )}
 {def $enddate = $item.enddate}
 {/if}
     <div id="ezpeventexcludeperiod_{$index}" class="ezpeventexcludeperiod">
