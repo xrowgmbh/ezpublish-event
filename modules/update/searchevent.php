@@ -54,9 +54,9 @@ if( $http->hasVariable('long_event'))
 }
 
 if($long_event == 1){
-    $long_event = true;
+    $long_event = "*";
 }elseif(!isset($long_event) || $long_event == ''){
-    $long_event ="*";
+    $long_event ="false";
 }
 
 if($free_event == 1){
