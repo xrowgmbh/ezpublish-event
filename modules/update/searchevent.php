@@ -36,11 +36,13 @@ if( $http->hasVariable('event_city'))
     $event_city = $http->variable('event_city');
 }
 
-if($http->hasvariable('SubTreeArray'))
+if( $http->hasvariable( 'SubTreeArray' ) )
 {
-    $SubTreeArray = $http->variable('SubTreeArray');
-}else{
-    $SubTreeArray = $ini->variable( 'Settings', 'SearchSource' );
+    $SubTreeArray = $http->variable( 'SubTreeArray' );
+}
+else
+{
+    $SubTreeArray = $ini->variable( 'Settings', 'ParentNodeID' );
 }
 
 if( $http->hasVariable('free_event'))
