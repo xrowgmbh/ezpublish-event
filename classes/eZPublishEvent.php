@@ -64,10 +64,12 @@ class eZPublishEvent
         return self::$currentDateFormat;
     }
 
-    function createSOLRDocument( eZContentObjectTreeNode $node, $update )
+    function createSOLRDocument( eZContentObject $object, $update )
     {
         $attributeName = $this->eZPEventINI->variable( 'Settings', 'AttributeName' );
         $fieldsForSOLRIndex = $this->eZPEventINI->variable( 'CronjobSettings', 'FieldsForSOLRIndex' );
+        $contentObject=eZContentObject::fetch($object->ID);
+        $node=eZContentObjectTreeNode::fetch( $contentObject->attribute('main_node_id'));
         $dataMap = $node->dataMap();
         $long_date=$dataMap["long_dated"];
         $prices_string = $dataMap["gratis"];
@@ -77,7 +79,6 @@ class eZPublishEvent
             if( $ezpevent->hasContent() )
             {
                 $docList = array();
-                $contentObject = $node->object();
                 $currentVersion = $contentObject->currentVersion();
                 $contentClassIdentifier = $contentObject->attribute( 'class_identifier' );
 

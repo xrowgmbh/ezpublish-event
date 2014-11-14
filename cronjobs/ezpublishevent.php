@@ -62,8 +62,9 @@ try
         {
             if( $event instanceof eZContentObjectTreeNode )
             {
+                $object = $event->object();
                 $ezpEvent = new eZPublishEvent();
-                $docList = $ezpEvent->createSOLRDocument( $event, $update );
+                $docList = $ezpEvent->createSOLRDocument( $object, $update );
                 #die(var_dump($docList));
                 $update->addDocuments( $docList );
                 $update->addCommit();

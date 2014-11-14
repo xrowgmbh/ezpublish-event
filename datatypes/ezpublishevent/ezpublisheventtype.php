@@ -166,6 +166,24 @@ class eZPublishEventType extends eZDataType
     }
 
     /*!
+     Method triggered on publish for event datatype
+    */
+    function onPublish( $contentObjectAttribute, $object, $publishedNodes )
+    {
+        if($object->ClassIdentifier == "event")
+        {
+            $client = eZPublishSolarium::createSolariumClient();
+            $update = $client->createUpdate();
+            $ezpEvent = new eZPublishEvent();
+            $docList = $ezpEvent->createSOLRDocument( $object, $update );
+            $update->addDocuments( $docList );
+            $update->addCommit();
+            $result = $client->update( $update );
+            unset( $docList );
+        }
+    }
+    
+    /*!
      Returns the content.
     */
     function objectAttributeContent( $contentObjectAttribute )
