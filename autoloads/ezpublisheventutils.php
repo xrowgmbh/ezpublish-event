@@ -38,11 +38,17 @@ class eZPEventUtils
                     $item['endtime-hour'] = ' 00';
                 $startTimeString = trim( $item['startdate'] ) . ' ' . trim( $item['starttime-hour'] );
                 $tmpStarttime = eZPublishEvent::createDateTime( $startTimeString, $item, 'start', $namedParameters['languageCode'] );
-                $tmpStarttime->setTime( 00, 00 );
+                if( $tmpStarttime instanceof DateTime )
+                {
+                    $tmpStarttime->setTime( 00, 00 );
+                }
                 $endTimeString = trim( $item['enddate'] ) . ' ' . trim( $item['endtime-hour'] );
                 $tmpEndtime = eZPublishEvent::createDateTime( $endTimeString, $item, 'end', $namedParameters['languageCode'] );
-                $tmpEndtime->setTime( 00, 00 );
-                $operatorValue = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
+                if( $tmpStarttime instanceof DateTime )
+                {
+                    $tmpEndtime->setTime( 00, 00 );
+                    $operatorValue = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
+                }
             } break;
         }
     }
