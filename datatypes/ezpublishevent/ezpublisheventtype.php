@@ -54,6 +54,10 @@ class eZPublishEventType extends eZDataType
                                             $timeString .= ' 00';
                                         }
                                         $endtime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'end', $contentObjectAttribute->LanguageCode );
+                                        if( $includeItem['startdate'] == $includeItem['enddate'] && trim( $includeItem['endtime-hour'] ) == '' )
+                                        {
+                                            $endtime->modify( '+1 day' );
+                                        }
                                     }
                                     else
                                     {
@@ -165,24 +169,6 @@ class eZPublishEventType extends eZDataType
         return true;
     }
 
-    /*!
-     Method triggered on publish for event datatype
-    */
-    function onPublish( $contentObjectAttribute, $object, $publishedNodes )
-    {
-        if($object->ClassIdentifier == "event")
-        {
-            $client = eZPublishSolarium::createSolariumClient();
-            $update = $client->createUpdate();
-            $ezpEvent = new eZPublishEvent();
-            $docList = $ezpEvent->createSOLRDocument( $object, $update );
-            $update->addDocuments( $docList );
-            $update->addCommit();
-            $result = $client->update( $update );
-            unset( $docList );
-        }
-    }
-    
     /*!
      Returns the content.
     */
