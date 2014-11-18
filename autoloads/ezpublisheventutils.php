@@ -44,7 +44,7 @@ class eZPEventUtils
                 }
                 $endTimeString = trim( $item['enddate'] ) . ' ' . trim( $item['endtime-hour'] );
                 $tmpEndtime = eZPublishEvent::createDateTime( $endTimeString, $item, 'end', $namedParameters['languageCode'] );
-                if( $tmpStarttime instanceof DateTime )
+                if( $tmpEndtime instanceof DateTime )
                 {
                     $tmpEndtime->setTime( 00, 00 );
                     $operatorValue = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
