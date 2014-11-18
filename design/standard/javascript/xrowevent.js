@@ -115,7 +115,7 @@ jQuery(document).ready(function() {
          });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                      'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
-        var url = '/update/searchevent';
+        var url = '/event/searchevent';
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
         var aj=$.ajax({
@@ -257,7 +257,7 @@ jQuery(document).ready(function() {
              });
             var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                          'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
-            var url = '/update/searchevent';
+            var url = '/event/searchevent';
             $("#search_results").children().remove();
             $("#search_results").addClass("is_loading");
             var aj=$.ajax({
@@ -397,7 +397,7 @@ jQuery(document).ready(function() {
          });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                      'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
-        var url = '/update/searchevent';
+        var url = '/event/searchevent';
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
         var aj=$.ajax({
@@ -536,7 +536,7 @@ jQuery(document).ready(function() {
          });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                      'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
-        var url = '/update/searchevent';
+        var url = '/event/searchevent';
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
         var aj=$.ajax({
