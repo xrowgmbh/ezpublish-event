@@ -4,7 +4,7 @@
  * if you don't set EventClassIdentifier or/and AttributeName or/and ParentNodeID in your ezpublishevent.ini or you would like to overwrite them, use this script with this options
  * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --parentNodeID=363959 --classidentifier=event --eventfield=ezpevent --startfield=start --endfield=end --limit=6000 --offset=0
  * otherwise like this
- * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --startfield=start --endfield=end --limit=6000 --offset=0
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --startfield=start --endfield=end --limit=6500 --offset=0
  * 
  * to remove old attributes
  * if you don't set EventClassIdentifier in your ezpublishevent.ini or you would like to overwrite it, use this script with option "--classidentifier=xyz"

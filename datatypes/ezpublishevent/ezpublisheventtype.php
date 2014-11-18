@@ -208,7 +208,7 @@ class eZPublishEventType extends eZDataType
                 $include[$key]['end'] = $contentIncludeItem->end;
                 if( isset( $contentIncludeItem->weekdays ) )
                 {
-                    $include[$key]['weekdays'] = $contentIncludeItem->weekdays;
+                    $include[$key]['weekdays'] = (array)$contentIncludeItem->weekdays;
                 }
                 // get the first start date and the last end date of all periods
                 if( $starttimestamp < $firststartdate || $firststartdate == 0 )
