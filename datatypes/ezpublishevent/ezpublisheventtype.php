@@ -194,7 +194,13 @@ class eZPublishEventType extends eZDataType
                 $include[$key]['end'] = $contentIncludeItem->end;
                 if( isset( $contentIncludeItem->weekdays ) )
                 {
-                    $include[$key]['weekdays'] = (array)$contentIncludeItem->weekdays;
+                    $weekdays = array();
+                    // ksort doesn't work here (don't know why) so we use a foreach for reindexing
+                    foreach($contentIncludeItem->weekdays as $weekday)
+                    {
+                        $weekdays[] = $weekday;
+                    }
+                    $include[$key]['weekdays'] = $weekdays;
                 }
                 // get the first start date and the last end date of all periods
                 if( $starttimestamp < $firststartdate || $firststartdate == 0 )
