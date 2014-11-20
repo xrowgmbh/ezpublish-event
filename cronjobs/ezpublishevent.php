@@ -52,6 +52,7 @@ try
         $events = eZContentObjectTreeNode::subTreeByNodeID( array(
                 'Limit' => $limit,
                 'Offset' => $offset,
+                'AttributeFilter' => array('and',array('state',"!=",15)),
                 'ClassFilterType' => 'include',
                 'ClassFilterArray' => array(
                         $classIdentifier
