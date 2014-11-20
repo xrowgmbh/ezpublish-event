@@ -1,13 +1,13 @@
 var divIDPrefix = 'ezpeventperiod',
     divExcludeIDPrefix = 'ezpeventexcludeperiod',
-    ezpeCounter = {include: 1,
-                   exclude: 1};
+    ezpeCounter = {include: 0,
+                   exclude: 0};
 jQuery(document).ready(function() {
     $('.ezpevent').each(function(){
         if(typeof $(this).data('attrid') !== 'undefined') {
             var attrid = $(this).data('attrid');
             if(typeof $('#counterInclude'+attrid) !== 'undefined' && parseInt($('#counterInclude'+attrid).data('counter')) > 1)
-                ezpeCounter['include'] = $('#counterInclude'+attrid).data('counter');
+                ezpeCounter['include'] = $('#counterInclude'+attrid).data('counter')-1;
             if(typeof $('#counterExclude'+attrid) !== 'undefined' && parseInt($('#counterExclude'+attrid).data('counter')) > 1)
                 ezpeCounter['exclude'] = $('#counterExclude'+attrid).data('counter');
         }
@@ -51,84 +51,6 @@ jQuery(document).ready(function() {
         });
     });
     
-    /* EVENT DATEPICKER LOGIC */
-    if ($(".event_datefield_from").length > 0)
-    {
-        var myDate = new Date();
-        var formated_days = myDate.getDate();
-        var formated_months = myDate.getMonth()+1;
-        if(formated_days<10) formated_days = "0" + formated_days;
-        if(formated_months<10) formated_months= "0" + formated_months;
-        if($(".event_datefield_to").val() == $(".event_datefield_from").val() && $(".event_datefield_to").val() == "" &&  $(".event_datefield_from").val() == "")
-        {
-            $(".event_datefield_from, .event_datefield_to").val( formated_days + '.' +  formated_months + '.' + myDate.getFullYear() );
-            var nextDayDate = new Date();
-            nextDayDate.setDate(myDate.getDate());
-            nextDate = nextDayDate.getDate();
-            nextMonth = nextDayDate.getMonth()+1;
-            if(nextDate<10) nextDate = "0" + nextDate;
-            if(nextMonth<10) nextMonth= "0" + nextMonth;
-            $(".event_datefield_to").val( nextDate + '.' +  nextMonth + '.' + myDate.getFullYear() );
-        }
-        
-        if ( $(".dp_language").val() != "GB" )
-        {
-            $.getScript("/extension/hannover/design/hannover/javascript/datepicker_locals/jquery.ui.datepicker-" + $(".dp_language").val() + ".js", function(){
-            });
-        }
-        
-        $( ".event_datefield_from" ).datepicker({
-            showOn: "button",
-            buttonImage: "/extension/hannover/design/hannover/images/calendar.png",
-            buttonImageOnly: true,
-            buttonText: $(".dp_button_value").val(),
-            dateFormat: 'dd.mm.yy',
-            minDate: new Date(),
-            onSelect: function( selectedDate ) {
-                var ctoday_split_array = selectedDate.split('.');
-                var myCToday=new Date(ctoday_split_array[2],ctoday_split_array[1]-1,ctoday_split_array[0]);
-                myCToday.setDate(myCToday.getDate());
-                var next_today_year = myCToday.getFullYear();
-                var next_today_month = myCToday.getMonth()+1;
-                var next_today_day = myCToday.getDate();
-                next_today_day = parseInt(next_today_day)<10 ?"0"+next_today_day:next_today_day;
-                next_today_month = parseInt(next_today_month)<10 ?"0"+next_today_month:next_today_month;
-                var this_my_day = next_today_day+'.'+next_today_month+'.'+next_today_year;
-                $( ".event_datefield_to" ).datepicker( "option", "minDate", this_my_day );
-                
-                var myday=$(this).val();
-                if(myday == $(".event_datefield_to").val())
-                {
-                    var split_array = myday.split('.');
-                    var myDate=new Date(split_array[2],split_array[1]-1,split_array[0]);
-                    myDate.setDate(myDate.getDate());
-                    var next_day_year = myDate.getFullYear();
-                    var next_day_month = myDate.getMonth()+1;
-                    var next_day_day = myDate.getDate();
-                    next_day_day = parseInt(next_day_day)<10 ?"0"+next_day_day:next_day_day;
-                    next_day_month = parseInt(next_day_month)<10 ?"0"+next_day_month:next_day_month;
-                    $(".event_datefield_to").val( next_day_day + '.' +  next_day_month + '.' + next_day_year );
-                }
-            }
-        });
-        
-        var today=$(".event_datefield_to").val();
-        var today_split_array = today.split('.');
-        var myToday=new Date(today_split_array[2],today_split_array[1]-1,today_split_array[0]);
-        
-        $( ".event_datefield_to" ).datepicker({
-            showOn: "button",
-            buttonImage: "/extension/hannover/design/hannover/images/calendar.png",
-            buttonImageOnly: true,
-            buttonText: $(".dp_button_value").val(),
-            dateFormat: 'dd.mm.yy',
-            minDate: myToday,
-            onSelect: function( selectedDate ) {
-                $( ".event_datefield_from" ).datepicker();
-            }
-        });
-    }
-    
     //for event search
     $.date = function(dateObject) {
         var d = new Date(dateObject * 1000);
@@ -161,7 +83,7 @@ jQuery(document).ready(function() {
 
     if($("#contenteventsearch").length > 0)
     {
-        var sorttype ='';
+        var sorttype='';
         var searchtext_temp='';
         var subtreearray='';
         var fromDate='';
@@ -190,7 +112,7 @@ jQuery(document).ready(function() {
             }else if(fd.name=='long_event'){
                 long_event=fd.value;
             }
-         });
+        });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                      'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
         var url = '/event/searchevent';
@@ -779,31 +701,34 @@ var parseDate = function(date) {
     }
 };
 var appendPeriod = function(element, div, findPrefix, removeButtonID) {
-    var index = element.data('index'),
-        new_index = ezpeCounter[findPrefix];
-    if(ezpeCounter[findPrefix] == 1)
-        index = 0;
-    //window.console.log('appendPeriod index '+index+' new_index '+new_index);
+
+    var index = element.attr('data-index');
+    /*if(ezpeCounter[findPrefix] == 1)
+        index = 0;*/
+	window.console.log(element);
+	window.console.log('index '+index);
     if(typeof $('#'+div+'_'+index) !== 'undefined' && $('#'+div+'_'+index).length) {
-        var content = $('#'+div+'_'+index).html(),
-            new_index = ezpeCounter[findPrefix];
-        content = replaceIndex(content, findPrefix, element, index, new_index);
-        // add new node after this
-        var newHTML = '<div id='+div+'_'+new_index+'>'+content+'</div>';
-        if(index == 0)
-            newHTML = '<div id='+div+'_'+new_index+'><hr class="ezpeventhr" />'+content+'</div>';
-        $(newHTML).insertAfter('#'+div+'_'+(new_index-1));
-        initializeDefault(new_index, findPrefix, element, div, removeButtonID);
         ezpeCounter[findPrefix]++;
+        var content = $('#'+div+'_'+index).html(),
+        next_index = ezpeCounter[findPrefix];
+        window.console.log('appendPeriod index '+index+' next index '+next_index+' counter '+ezpeCounter[findPrefix]);
+        content = replaceIndex(content, findPrefix, element, index, next_index);
+        // add new node after this
+        var newHTML = '<div id='+div+'_'+next_index+'>'+content+'</div>';
+        if(index == 0)
+            newHTML = '<div id='+div+'_'+next_index+'><hr class="ezpeventhr" />'+content+'</div>';
+        $(newHTML).insertAfter('#'+div+'_'+(next_index-1));
+        initializeDefault(next_index, findPrefix, element, div, removeButtonID);
     }
 };
 var removePeriod = function(element, div, findPrefix, addButton, removeButtonID) {
-    var index = element.data('index'),
+    var index = element.attr('data-index'),
         next_index = index+1,
         allDivsCounter = ezpeCounter[findPrefix];
     $('#'+div+'_'+index).remove();
-    ezpeCounter[findPrefix]--;
-    //window.console.log('1. initializeDefault removePeriod index '+index+' next index '+next_index+' counter '+ezpeCounter[findPrefix]);
+    //window.console.log(ezpeCounter);
+    ezpeCounter[findPrefix] = ezpeCounter[findPrefix]-1;
+    window.console.log('removePeriod index '+index+' next index '+next_index+' counter '+ezpeCounter[findPrefix]);
     addButton.attr('data-index', ezpeCounter[findPrefix]);
     if(typeof $('#'+div+'_'+next_index) !== 'undefined' && $('#'+div+'_'+next_index).length) {
         for(i = next_index; i <= allDivsCounter ; i++) {
@@ -822,11 +747,12 @@ var removePeriod = function(element, div, findPrefix, addButton, removeButtonID)
         if(typeof lastCounter !== 'undefined') {
             addButton.attr('data-index', lastCounter);
             ezpeCounter[findPrefix] = lastCounter+1;
+            //window.console.log('lastCounter '+lastCounter);
         }
     }
-    else if(ezpeCounter[findPrefix] == 1) {
+    /*else if(ezpeCounter[findPrefix] == 1) {
         addButton.attr('data-index', 0);
-    }
+    }*/
 };
 var initializeDefault = function(index, findPrefix, element, div, removeButtonID) {
     if(findPrefix == 'include')
@@ -845,15 +771,19 @@ var initializeDefault = function(index, findPrefix, element, div, removeButtonID
 };
 var replaceIndex = function(content, findPrefix, element, index, new_index) {
     var findArray = {0: findPrefix+'\\]\\['+index,
-            1: '_'+index,
-            2: 'data-index="'+index+'"',
-            3: ' hasDatepicker',
-            4: 'value=".*?"'},
+                     1: 'period_'+index,
+                     2: 'date_'+index,
+                     3: 'days_'+index,
+                     4: 'data-index="'+index+'"',
+                     5: ' hasDatepicker',
+                     6: 'value=".*?"'},
         replaceArray = {0: findPrefix+'\]\['+new_index,
-            1: '_'+new_index,
-            2: 'data-index="'+new_index+'"',
-            3: '',
-            4: 'value=""'};
+                        1: 'period_'+new_index,
+                        2: 'date_'+new_index,
+                        3: 'days_'+new_index,
+                        4: 'data-index="'+new_index+'"',
+                        5: '',
+                        6: 'value=""'};
     if(typeof content !== 'undefined') {
         for (key in findArray) {
             var regex = new RegExp(findArray[key], 'g'),
