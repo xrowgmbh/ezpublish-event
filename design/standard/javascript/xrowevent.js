@@ -52,7 +52,7 @@ jQuery(document).ready(function() {
     });
     
     /* EVENT DATEPICKER LOGIC */
-    if ($(".event_form_elements").length > 0)
+    if ($(".event_datefield_from").length > 0)
     {
         var myDate = new Date();
         var formated_days = myDate.getDate();
