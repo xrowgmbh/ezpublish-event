@@ -177,7 +177,19 @@ class eZPublishEventType extends eZDataType
         if($object->ClassIdentifier == "event")
         {
             $client = eZPublishSolarium::createSolariumClient();
+            $query = $client->createSelect();
             $update = $client->createUpdate();
+            
+            $query->setQuery('meta_id_si:'.$object->ID );
+            $resulttest = $client->select($query);
+
+            if($resulttest->getNumFound() != 0)
+            {
+                $update->addDeleteQuery( 'meta_id_si:'.$object->ID );
+                $update->addCommit();
+                $deleteResult = $client->update( $update );
+            }
+            
             $ezpEvent = new eZPublishEvent();
             $docList = $ezpEvent->createSOLRDocument( $object, $update );
             $update->addDocuments( $docList );

@@ -20,7 +20,7 @@ $limit = 500;
 $offset = 0;
 
 ####### WICHTIG: wenn das auf true ist, wird der ganze SOLR-Index entfernt
-$clearIndex = false;
+$clearIndex = true;
 
 // execute the ping query
 try
