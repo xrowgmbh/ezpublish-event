@@ -79,6 +79,7 @@ class eZPublishEvent
             if( $ezpevent->hasContent() )
             {
                 $docList = array();
+                $path_array = array();
                 $currentVersion = $contentObject->currentVersion();
                 $contentClassIdentifier = $contentObject->attribute( 'class_identifier' );
 
@@ -88,11 +89,26 @@ class eZPublishEvent
                 
                 $languageCode = 'ger-DE';
                 $parent = $node->fetchParent();
+
+                if($contentObject->attribute('has_visible_node'))
+                {
+                    $nodes=$contentObject->attribute('visible_nodes');
+                    foreach($nodes as $node)
+                    {
+                        foreach(array_map('intval',explode('/',$node->PathString)) as $node_element)
+                        {
+                            array_push($path_array,$node_element);
+                        }
+                    }
+                }else{
+                    $path_array=array_map('intval',explode('/',$node->PathString));
+                }
+
                 $defaultData = array( 'attr_name_t' => $contentObject->name( false, $languageCode ),
                                       'meta_id_si' => $contentObject->ID,
                                       'meta_url_alias_ms' => $node->attribute( 'url_alias' ),
                                       'meta_main_parent_node_id_si' => $parent->NodeID ,
-                                      'meta_path_si' => array_map('intval',explode('/',$node->PathString)),
+                                      'meta_path_si' => $path_array,
                                       'attr_prices_t'=> $prices_string->DataInt,
                                       'attr_long_date_b'=> $long_date->DataInt);
 

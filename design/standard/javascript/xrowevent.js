@@ -258,7 +258,7 @@ jQuery(document).ready(function() {
                                 $('#search_results').append(newcontent);
                             },
                             error:function(){
-                                alert("error page!");
+                                alert("Search server is not reachable!");
                             } });
                     }else{
                         for(var i=page_index*items_per_page;i<max_elem;i++)
@@ -295,7 +295,7 @@ jQuery(document).ready(function() {
                 }
             },
             error:function(){
-                alert("error!");
+                alert("Search server is not reachable!");
             }
         });
     }
@@ -400,7 +400,7 @@ jQuery(document).ready(function() {
                                     $('#search_results').append(newcontent);
                                 },
                                 error:function(){
-                                    alert("error page!");
+                                    alert("Search server is not reachable!");
                                 } });
                         }else{
                             for(var i=page_index*items_per_page;i<max_elem;i++)
@@ -437,7 +437,7 @@ jQuery(document).ready(function() {
                     }
                 },
                 error:function(){
-                    alert("error!");
+                    alert("Search server is not reachable!");
                 }
             });
         }
@@ -540,7 +540,7 @@ jQuery(document).ready(function() {
                                 $('#search_results').append(newcontent);
                             },
                             error:function(){
-                                alert("error page!");
+                                alert("Search server is not reachable!");
                             } });
                     }else{
                         for(var i=page_index*items_per_page;i<max_elem;i++)
@@ -577,7 +577,7 @@ jQuery(document).ready(function() {
                 }
             },
             error:function(){
-                alert("error!");
+                alert("Search server is not reachable!");
             }
         });
     });
@@ -679,7 +679,7 @@ jQuery(document).ready(function() {
                                 $('#search_results').append(newcontent);
                             },
                             error:function(){
-                                alert("error page!");
+                                alert("Search server is not reachable!");
                             } });
                     }else{
                         for(var i=page_index*items_per_page;i<max_elem;i++)
@@ -716,7 +716,7 @@ jQuery(document).ready(function() {
                 }
             },
             error:function(){
-                alert("error!");
+                alert("Search server is not reachable!");
             }
         });
     });
