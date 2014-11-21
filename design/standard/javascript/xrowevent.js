@@ -581,7 +581,7 @@ jQuery(document).ready(function() {
             }
         });
     });
-    $("#contenteventsearch .submitbutton").click(function(){
+    $("#contenteventsearch .submitbutton,#contenteventsearch #formsubmit").click(function(){
         var sorttype ='';
         var searchtext_temp='';
         var subtreearray='';
