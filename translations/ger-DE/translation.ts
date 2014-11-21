@@ -86,6 +86,10 @@
         <translation>Bitte wählen Sie ein Startdatum, welches in der Zukunft liegt.</translation>
     </message>
     <message>
+        <source>Select an end date in the future.</source>
+        <translation>Bitte wählen Sie ein Enddatum, welches in der Zukunft liegt.</translation>
+    </message>
+    <message>
         <source>Maximum period of an event is one year.</source>
         <translation>Die maximale Dauer einer Veranstaltung ist ein Jahr.</translation>
     </message>

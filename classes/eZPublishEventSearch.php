@@ -2,49 +2,60 @@
 
 class eZPublishEventSearch
 {
-
     public static function update(eZContentObject $object, $commit = true)
     {
-        if ($object->ClassIdentifier == "event") {
-            $client = eZPublishSolarium::createSolariumClient();
-            $query = $client->createSelect();
-            
-            $query->setQuery('meta_id_si:' . $object->ID);
-            $resulttest = $client->select($query);
-            
-            if ($resulttest->getNumFound() != 0) {
+        $ezpublishevent_ini = eZINI::instance( 'ezpublishevent.ini' );
+        if($ezpublishevent_ini->hasVariable( 'Settings', 'EventClassIdentifier' ))
+        {
+            $classidentifier = $ezpublishevent_ini->variable( 'Settings', 'EventClassIdentifier' );
+            if ($object->ClassIdentifier == $classidentifier)
+            {
+                $client = eZPublishSolarium::createSolariumClient();
+                $query = $client->createSelect();
+                
+                $query->setQuery('meta_id_si:' . $object->ID);
+                $resulttest = $client->select($query);
+                
+                if ($resulttest->getNumFound() != 0) {
+                    $update = $client->createUpdate();
+                    $update->addDeleteQuery('meta_id_si:' . $object->ID);
+                    $deleteResult = $client->update($update);
+                }
+                
+                $ezpEvent = new eZPublishEvent();
                 $update = $client->createUpdate();
-                $update->addDeleteQuery('meta_id_si:' . $object->ID);
-                $deleteResult = $client->update($update);
+                $docList = $ezpEvent->createSOLRDocument($object, $update);
+                $update->addDocuments($docList);
+                $update->addCommit();
+                $result = $client->update($update);
+                unset($docList);
             }
-            
-            $ezpEvent = new eZPublishEvent();
-            $update = $client->createUpdate();
-            $docList = $ezpEvent->createSOLRDocument($object, $update);
-            $update->addDocuments($docList);
-            $update->addCommit();
-            $result = $client->update($update);
-            unset($docList);
         }
     }
 
     public static function delete(eZContentObject $object, $commit = true)
     {
-        if ($object->ClassIdentifier == "event") {
-            $client = eZPublishSolarium::createSolariumClient();
-            $query = $client->createSelect();
-            
-            $query->setQuery('meta_id_si:' . $object->ID);
-            $resulttest = $client->select($query);
-            
-            if ($resulttest->getNumFound() != 0) {
-                $update = $client->createUpdate();
-                $update->addDeleteQuery('meta_id_si:' . $object->ID);
-                $update->addCommit();
-                $deleteResult = $client->update($update);
+        $ezpublishevent_ini = eZINI::instance( 'ezpublishevent.ini' );
+        if($ezpublishevent_ini->hasVariable( 'Settings', 'EventClassIdentifier' ))
+        {
+            $classidentifier = $ezpublishevent_ini->variable( 'Settings', 'EventClassIdentifier' );
+            if ($object->ClassIdentifier == $classidentifier)
+            {
+                $client = eZPublishSolarium::createSolariumClient();
+                $query = $client->createSelect();
+                $query->setQuery('meta_id_si:' . $object->ID);
+                $resulttest = $client->select($query);
+                if ($resulttest->getNumFound() != 0)
+                {
+                    $update = $client->createUpdate();
+                    $update->addDeleteQuery('meta_id_si:' . $object->ID);
+                    $update->addCommit();
+                    $deleteResult = $client->update($update);
+                }
             }
         }
     }
+
     public static function commit()
     {
         $client = eZPublishSolarium::createSolariumClient();
@@ -52,6 +63,7 @@ class eZPublishEventSearch
         $update->addCommit();
         $result = $client->update($update);
     }
+
     public static function clean($optimize)
     {
         $client = eZPublishSolarium::createSolariumClient();
