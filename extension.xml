@@ -7,4 +7,9 @@
         <license>GPL</license>
         <info_url>https://github.com/xrowgmbh/ezpublish-event</info_url>
     </metadata>
+    <dependencies>
+        <requires>
+            <extension name="ezfind" />
+        </requires>
+    </dependencies>
 </software>
