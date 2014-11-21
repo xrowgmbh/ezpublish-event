@@ -25,24 +25,17 @@ $clearIndex = true;
 // execute the ping query
 try
 {
-    $client = eZPublishSolarium::createSolariumClient();
     if ( !$isQuiet )
     {
         $cli->output( "SOLR ping query successful\n" );
     }
-    $query = $client->createSelect();
-    $update = $client->createUpdate();
     // clear the old index first
     if( $clearIndex )
     {
-        $update->addDeleteQuery( '*:*' );
-        $update->addCommit();
-        $deleteResult = $client->update( $update );
+        eZPublishEventSearch::clean();
         if ( !$isQuiet )
         {
             $cli->output( "Clear SOLR index query executed\n" );
-            $cli->output( "Query status: " . $deleteResult->getStatus() . "\n" );
-            $cli->output( "Query time: " . $deleteResult->getQueryTime() . "\n" );
         }
     }
     // index all events
@@ -63,17 +56,11 @@ try
         {
             if( $event instanceof eZContentObjectTreeNode )
             {
-                $object = $event->object();
-                $ezpEvent = new eZPublishEvent();
-                $docList = $ezpEvent->createSOLRDocument( $object, $update );
-                #die(var_dump($docList));
-                $update->addDocuments( $docList );
-                $update->addCommit();
-                $result = $client->update( $update );
-                unset( $docList );
+                eZPublishEventSearch::update( $event->object(), false );
             }
         }
         $offset = $offset + $events_count;
+        eZPublishEventSearch::commit();
     }
     while ( $events_count == $limit );
 }
