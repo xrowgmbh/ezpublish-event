@@ -2,7 +2,7 @@
 
 [SearchSettings]
 ExtensionDirectories[]=ezpublish-event
-SearchEngine=ezsolr
+SearchEngine=ezdual
 
 [TemplateSettings]
 ExtensionAutoloadPath[]=ezpublish-event
