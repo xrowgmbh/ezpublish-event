@@ -108,7 +108,7 @@ class eZPublishEvent
                                       'meta_id_si' => $contentObject->ID,
                                       'meta_url_alias_ms' => $node->attribute( 'url_alias' ),
                                       'meta_main_parent_node_id_si' => $parent->NodeID ,
-                                      'meta_path_si' => $path_array,
+                                      'meta_path_si' => array_unique( $path_array ),
                                       'attr_prices_t'=> $prices_string->DataInt,
                                       'attr_long_date_b'=> $long_date->DataInt);
 
