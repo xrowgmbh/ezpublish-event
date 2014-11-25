@@ -83,7 +83,13 @@ class eZPublishEventType extends eZDataType
                                                                 'end' => $endtime->format( eZPublishEvent::DATE_FORMAT ) );
                                         if( isset( $includeItem['weekdays'] ) && count( $includeItem['weekdays'] ) < 7 )
                                         {
-                                            $include[$key]['weekdays'] = $includeItem['weekdays'];
+                                            $weekdayNames = array( 0 => 'Mon', 1 => 'Tue', 2 => 'Wed', 3 => 'Thu', 4 => 'Fri', 5 => 'Sat', 6 => 'Sun' );
+                                            $weekdays = array();
+                                            foreach( $includeItem['weekdays'] as $index => $weekday )
+                                            {
+                                                $weekdays[] = $weekdayNames[$index];
+                                            }
+                                            $include[$key]['weekdays'] = $weekdays;
                                         }
                                     }
                                 }
