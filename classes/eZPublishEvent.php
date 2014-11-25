@@ -345,19 +345,22 @@ class eZPublishEvent
                     {
                         $timeString = trim( $ezpeventIncludeItem['startdate'] ) . ' ' . trim( $ezpeventIncludeItem['starttime-hour'] );
                         $starttime = eZPublishEvent::createDateTime( $timeString, $ezpeventIncludeItem, 'start', $languageCode );
-                        $endtime = clone $starttime;
-                        if( trim( $ezpeventIncludeItem['endtime-hour'] ) == '00' || trim( $ezpeventIncludeItem['endtime-hour'] ) == '' )
+                        if( $starttime instanceof DateTime )
                         {
-                            $endtime->modify( '+1 day' );
-                            $endtime->setTime( 00, 00 );
-                        }
-                        elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) != '' )
-                        {
-                            $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), trim( $ezpeventIncludeItem['endtime-minute'] ) );
-                        }
-                        elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) == '' )
-                        {
-                            $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), 00 );
+                            $endtime = clone $starttime;
+                            if( trim( $ezpeventIncludeItem['endtime-hour'] ) == '00' || trim( $ezpeventIncludeItem['endtime-hour'] ) == '' )
+                            {
+                                $endtime->modify( '+1 day' );
+                                $endtime->setTime( 00, 00 );
+                            }
+                            elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) != '' )
+                            {
+                                $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), trim( $ezpeventIncludeItem['endtime-minute'] ) );
+                            }
+                            elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) == '' )
+                            {
+                                $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), 00 );
+                            }
                         }
                     }
                     if( $endtime instanceof DateTime )

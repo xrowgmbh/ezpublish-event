@@ -9,7 +9,7 @@ jQuery(document).ready(function() {
             if(typeof $('#counterInclude'+attrid) !== 'undefined' && parseInt($('#counterInclude'+attrid).data('counter')) > 1)
                 ezpeCounter['include'] = $('#counterInclude'+attrid).data('counter')-1;
             if(typeof $('#counterExclude'+attrid) !== 'undefined' && parseInt($('#counterExclude'+attrid).data('counter')) > 1)
-                ezpeCounter['exclude'] = $('#counterExclude'+attrid).data('counter');
+                ezpeCounter['exclude'] = $('#counterExclude'+attrid).data('counter')-1;
         }
         if(typeof $(this).data('locale') !== 'undefined') {
             var datePickerLocale = $(this).data('locale'),
@@ -780,11 +780,12 @@ var parseDate = function(date) {
 };
 var appendPeriod = function(element, div, findPrefix, removeButtonID) {
     var index = element.attr('data-index');
+    //window.console.log('appendPeriod #'+div+'_'+index+' ezpeCounter['+findPrefix+'] '+ezpeCounter[findPrefix]);
     if(typeof $('#'+div+'_'+index) !== 'undefined' && $('#'+div+'_'+index).length) {
         ezpeCounter[findPrefix]++;
         var content = $('#'+div+'_'+index).html(),
-        next_index = ezpeCounter[findPrefix];
-        //window.console.log('appendPeriod index '+index+' next index '+next_index+' counter '+ezpeCounter[findPrefix]);
+            next_index = ezpeCounter[findPrefix];
+        //window.console.log('appendPeriod index '+index+' next index '+next_index+' ezpeCounter['+findPrefix+'] '+ezpeCounter[findPrefix]);
         content = replaceIndex(content, findPrefix, element, index, next_index);
         // add new node after this
         var newHTML = '<div id='+div+'_'+next_index+'>'+content+'</div>';
@@ -795,13 +796,13 @@ var appendPeriod = function(element, div, findPrefix, removeButtonID) {
     }
 };
 var removePeriod = function(element, div, findPrefix, addButton, removeButtonID) {
-    var index = element.attr('data-index'),
+    var index = parseInt(element.attr('data-index')),
         next_index = index+1,
         allDivsCounter = ezpeCounter[findPrefix];
     $('#'+div+'_'+index).remove();
     //window.console.log(ezpeCounter);
-    ezpeCounter[findPrefix] = ezpeCounter[findPrefix]-1;
-    //window.console.log('removePeriod index '+index+' next index '+next_index+' counter '+ezpeCounter[findPrefix]);
+    ezpeCounter[findPrefix]--;
+    //window.console.log('removePeriod index '+index+' next index '+next_index+' ezpeCounter['+findPrefix+'] '+ezpeCounter[findPrefix]);
     addButton.attr('data-index', ezpeCounter[findPrefix]);
     if(typeof $('#'+div+'_'+next_index) !== 'undefined' && $('#'+div+'_'+next_index).length) {
         for(i = next_index; i <= allDivsCounter ; i++) {
@@ -812,15 +813,8 @@ var removePeriod = function(element, div, findPrefix, addButton, removeButtonID)
                     $('#'+div+'_'+i).remove();
                     $('<div id='+div+'_'+(i-1)+'>'+content+'</div>').insertAfter('#'+div+'_'+(i-2));
                     initializeDefault((i-1), findPrefix, addButton, div, removeButtonID);
-                    //window.console.log('initializeDefault removePeriod Index '+(i-1));
-                    var lastCounter = i-1;
                 }
             }
-        }
-        if(typeof lastCounter !== 'undefined') {
-            addButton.attr('data-index', lastCounter);
-            ezpeCounter[findPrefix] = lastCounter+1;
-            //window.console.log('lastCounter '+lastCounter);
         }
     }
 };
