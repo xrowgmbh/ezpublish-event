@@ -206,6 +206,10 @@ class eZPublishEvent
                         $end_0=$endtime->setTime(0,0);
                         $end = $end_0->getTimestamp();
                         // check all days
+                        if(($end-$start)==86400 && $endtime->setTimestamp( $ezpeventItem['endtime'] )->format('H:i')=='00:00')
+                        {
+                            $end=$start;
+                        }
                         for( $day = $start; $day <= $end; $day = $day+86400 )
                         {
                             if( !isset( $excludeDays ) || ( isset( $excludeDays ) && !array_key_exists( $day, $excludeDays ) ) )
