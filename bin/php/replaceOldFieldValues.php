@@ -138,53 +138,61 @@ if(isset($classidentifier))
                                 $script->shutdown( 1 );
                             }
                         }
-                        $params = array( 'Limit' => $limit,
+                        /*$params = array( 'Limit' => $limit,
                                          'Offset' => $offset,
                                          'SortBy' => array('published', true),
                                          'IgnoreVisibility' => true,
                                          'ClassFilterType' => 'include',
                                          'ClassFilterArray' => array( $classidentifier ) );
-                        $nodes = eZContentObjectTreeNode::subTreeByNodeID( $params, $parentNodeID );
-                        if( count( $nodes ) > 0 )
+                        $nodes = eZContentObjectTreeNode::subTreeByNodeID( $params, $parentNodeID );*/
+                        $objects=eZContentObject::fetchList(true,array('contentclass_id'=>43));
+                        if( count( $objects ) > 0 )
                         {
-                            $cli->output( "Start fetching " . count( $nodes ). " " . $classidentifier );
-                            foreach( $nodes as $node )
+                            $cli->output( "Start fetching " . count( $objects ). " " . $classidentifier );
+                            foreach( $objects as $object )
                             {
-                                if( $node instanceof eZContentObjectTreeNode )
+                                if( $object instanceof eZContentObject )
                                 {
-                                    $dataMap = $node->dataMap();
-                                    if( isset( $dataMap[$eventfield] ) )
+                                    $object_versions= $object->versions(true);
+                                    foreach($object_versions as $object_version)
                                     {
-                                        if( isset( $dataMap[$startfield] ) && isset( $dataMap[$endfield] ) )
+                                        $dataMap = $object_version->dataMap();
+                                        if( isset( $dataMap[$eventfield] ) )
                                         {
-                                            $startdate = $dataMap[$startfield];
-                                            $enddate = $dataMap[$endfield];
-                                            $start = new DateTime();
-                                            $start->setTimestamp($startdate->attribute( 'data_int' ));
-                                            $end = new DateTime();
-                                            $end->setTimestamp($enddate->attribute( 'data_int' ));
-                                            $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
+                                            if( isset( $dataMap[$startfield] ) && isset( $dataMap[$endfield] ) )
+                                            {
+                                                $startdate = $dataMap[$startfield];
+                                                $enddate = $dataMap[$endfield];
+                                                $start = new DateTime();
+                                                $start->setTimestamp($startdate->attribute( 'data_int' ));
+                                                $end = new DateTime();
+                                                $end->setTimestamp($enddate->attribute( 'data_int' ));
+                                                $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
                                                                                               'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
-                                            $jsonString = json_encode( $include );
-                                            $dataMap[$eventfield]->setAttribute( 'data_text', $jsonString );
-                                            $dataMap[$eventfield]->store();
-                                            $node->store();
-                                            $cli->output( "Set value for node " . $node->NodeID );
-                                        }
-                                        else
-                                        {
-                                            $cli->error( "startfield and endfield have to be in the data map of the node" );
-                                            $script->shutdown( 1 );
-                                        }
-                                    }
-                                    else
-                                    {
-                                        $cli->error( "eventfield has to be in the data map of the node" );
-                                        $script->shutdown( 1 );
-                                    }
-                                }
-                            }
-                        }
+                                                $jsonString = json_encode( $include );
+                                                $dataMap[$eventfield]->setAttribute( 'data_text', $jsonString );
+                                                $dataMap[$eventfield]->store();
+                                                $object_version->store();
+                                                $cli->output( "Set value for Object " . $object_version->ID );
+                                              }
+                                              else
+                                              {
+                                                  $cli->error( "startfield and endfield have to be in the data map of the node" );
+                                                  $script->shutdown( 1 );
+                                                  //continue;
+                                              }
+                                          }
+                                          else
+                                          {
+                                               $cli->error( "eventfield has to be in the data map of the node" );
+                                               $script->shutdown( 1 );
+                                              // echo $eventfield;
+                                              // continue;
+                                          }
+                                     }
+                                 }
+                             }
+                         }
                     }
                 }
             }
