@@ -363,7 +363,7 @@ class eZPublishEvent
                             $lastenddate = $endtimestamp;
                     }
                 }
-                if( $lastenddate > 0 )
+                if( ( $object->CurrentVersion > 1 && $lastenddate > 0 ) || ( $object->CurrentVersion == 1 && $lastenddate > time() ) )
                     return $lastenddate;
             }
         }
