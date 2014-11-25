@@ -2,15 +2,15 @@
 
 /* 
  * if you don't set EventClassIdentifier or/and AttributeName or/and ParentNodeID in your ezpublishevent.ini or you would like to overwrite them, use this script with this options
- * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --parentNodeID=363959 --classidentifier=event --eventfield=ezpevent --startfield=start --endfield=end --limit=6000 --offset=0
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --classidentifier=event --eventfield=ezpevent --startfield=start --endfield=end
  * otherwise like this
- * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --startfield=start --endfield=end --limit=6500 --offset=0
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --replace --startfield=start --endfield=end
  * 
  * to remove old attributes
  * if you don't set EventClassIdentifier in your ezpublishevent.ini or you would like to overwrite it, use this script with option "--classidentifier=xyz"
- * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --remove --classidentifier=event --deleteFields=start,end,event_series
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --remove --classidentifier=event --deleteFields=start,end
  * otherwise like this
- * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --remove --deleteFields=start,end,event_series
+ * php extension/ezpublish-event/bin/php/replaceOldFieldValues.php --remove --deleteFields=start,end
  */
 
 require 'autoload.php';
@@ -52,15 +52,16 @@ if(!isset($options['classidentifier']))
         $script->shutdown( 1 );
     }
 }
-else
+else{
     $classidentifier = $options['classidentifier'];
+}
 if(isset($classidentifier))
 {
     $class = eZContentClass::fetchByIdentifier($classidentifier);
     if($class instanceof eZContentClass)
     {
-        $limit = $options['limit'] ? (int)$options['limit'] : 1000;
-        $offset = $options['offset'] ? (int)$options['offset'] : 0;
+        //$limit = $options['limit'] ? (int)$options['limit'] : 1000;
+        //$offset = $options['offset'] ? (int)$options['offset'] : 0;
         if(isset($options['replace']))
         {
             if(!isset($options['eventfield']))
@@ -95,7 +96,7 @@ if(isset($classidentifier))
                 }
                 if($eventattribute !== null)
                 {
-                    if(!isset($options['parentNodeID']))
+                   /* if(!isset($options['parentNodeID']))
                     {
                         if($ezpublishevent_ini->hasVariable( 'Settings', 'ParentNodeID' ))
                         {
@@ -108,9 +109,9 @@ if(isset($classidentifier))
                         }
                     }
                     else
-                        $parentNodeID = $options['parentNodeID'];
-                    if(isset($parentNodeID))
-                    {
+                        $parentNodeID = $options['parentNodeID'];*/
+                   // if(isset($parentNodeID))
+                   // {
                         if(!isset($options['startfield']) || !isset($options['endfield']))
                         {
                             if(!isset($options['startfield']) && isset($options['endfield']))
@@ -193,7 +194,7 @@ if(isset($classidentifier))
                                  }
                              }
                          }
-                    }
+                    //}
                 }
             }
         }
@@ -204,9 +205,9 @@ if(isset($classidentifier))
                 $cli->error( "Please set deleteFields" );
                 $script->shutdown( 1 );
             }
-            else
+            else{
                 $deleteFields = $options['deleteFields'];
-
+            }
             if( $deleteFields !== false && $deleteFields != '' )
             {
                 $cli->output( "Start removing attributes " . $deleteFields );
