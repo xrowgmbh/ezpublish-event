@@ -844,16 +844,18 @@ var replaceIndex = function(content, findPrefix, element, index, new_index) {
                      1: 'period_'+index,
                      2: 'date_'+index,
                      3: 'days_'+index,
-                     4: 'data-index="'+index+'"',
-                     5: ' hasDatepicker',
-                     6: 'value=".*?"'},
+                     4: 'exclude_'+index,
+                     5: 'data-index="'+index+'"',
+                     6: ' hasDatepicker',
+                     7: 'value=".*?"'},
         replaceArray = {0: findPrefix+'\]\['+new_index,
                         1: 'period_'+new_index,
                         2: 'date_'+new_index,
                         3: 'days_'+new_index,
-                        4: 'data-index="'+new_index+'"',
-                        5: '',
-                        6: 'value=""'};
+                        4: 'exclude_'+new_index,
+                        5: 'data-index="'+new_index+'"',
+                        6: '',
+                        7: 'value=""'};
     if(typeof content !== 'undefined') {
         for (key in findArray) {
             var regex = new RegExp(findArray[key], 'g'),
