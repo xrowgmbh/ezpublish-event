@@ -321,41 +321,50 @@ class eZPublishEvent
             if ( $http->hasPostVariable( 'ContentObjectAttribute_ezpeventdate_data_' . $http->postVariable( 'ezpeventdate_attr_id' ) ) )
             {
                 $ezpevent = $http->postVariable( 'ContentObjectAttribute_ezpeventdate_data_' . $http->postVariable( 'ezpeventdate_attr_id' ) );
-                $lastitem = array_pop( $ezpevent['include'] );
-                if( trim( $lastitem['enddate'] ) != '' )
+                $lastenddate = 0;
+                foreach( $ezpevent['include'] as $key => $ezpeventIncludeItem )
                 {
-                    $timeString = trim( $lastitem['enddate'] );
-                    if( trim( $lastitem['endtime-hour'] ) != '' )
+                    if( trim( $ezpeventIncludeItem['enddate'] ) != '' )
                     {
-                        $timeString .= ' ' . trim( $lastitem['endtime-hour'] );
+                        $timeString = trim( $ezpeventIncludeItem['enddate'] );
+                        if( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' )
+                        {
+                            $timeString .= ' ' . trim( $ezpeventIncludeItem['endtime-hour'] );
+                        }
+                        else
+                        {
+                            $timeString .= ' 00';
+                        }
+                        $endtime = eZPublishEvent::createDateTime( $timeString, $ezpeventIncludeItem, 'end', $languageCode );
                     }
                     else
                     {
-                        $timeString .= ' 00';
+                        $timeString = trim( $ezpeventIncludeItem['startdate'] ) . ' ' . trim( $ezpeventIncludeItem['starttime-hour'] );
+                        $starttime = eZPublishEvent::createDateTime( $timeString, $ezpeventIncludeItem, 'start', $languageCode );
+                        $endtime = clone $starttime;
+                        if( trim( $ezpeventIncludeItem['endtime-hour'] ) == '00' || trim( $ezpeventIncludeItem['endtime-hour'] ) == '' )
+                        {
+                            $endtime->modify( '+1 day' );
+                            $endtime->setTime( 00, 00 );
+                        }
+                        elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) != '' )
+                        {
+                            $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), trim( $ezpeventIncludeItem['endtime-minute'] ) );
+                        }
+                        elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) == '' )
+                        {
+                            $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), 00 );
+                        }
                     }
-                    $endtime = eZPublishEvent::createDateTime( $timeString, $lastitem, 'end', $languageCode );
+                    if( $endtime instanceof DateTime )
+                    {
+                        $endtimestamp = $endtime->getTimestamp();
+                        if( $endtimestamp > $lastenddate || $lastenddate == 0 )
+                            $lastenddate = $endtimestamp;
+                    }
                 }
-                else
-                {
-                    $timeString = trim( $lastitem['startdate'] ) . ' ' . trim( $lastitem['starttime-hour'] );
-                    $starttime = eZPublishEvent::createDateTime( $timeString, $lastitem, 'start', $languageCode );
-                    $endtime = clone $starttime;
-                    if( trim( $lastitem['endtime-hour'] ) == '00' || trim( $lastitem['endtime-hour'] ) == '' )
-                    {
-                        $endtime->modify( '+1 day' );
-                        $endtime->setTime( 00, 00 );
-                    }
-                    elseif( trim( $lastitem['endtime-hour'] ) != '' && trim( $lastitem['endtime-minute'] ) != '' )
-                    {
-                        $endtime->setTime( trim( $lastitem['endtime-hour'] ), trim( $lastitem['endtime-minute'] ) );
-                    }
-                    elseif( trim( $lastitem['endtime-hour'] ) != '' && trim( $lastitem['endtime-minute'] ) == '' )
-                    {
-                        $endtime->setTime( trim( $lastitem['endtime-hour'] ), 00 );
-                    }
-                }
-                if( $endtime instanceof DateTime )
-                    return $endtime->getTimestamp();
+                if( $lastenddate > 0 )
+                    return $lastenddate;
             }
         }
         return false;

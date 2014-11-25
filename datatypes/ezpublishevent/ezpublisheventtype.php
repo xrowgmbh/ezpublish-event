@@ -24,7 +24,7 @@ class eZPublishEventType extends eZDataType
             $data_text = array();
             $include = array();
             $exclude = array();
-            $days = array();
+            $version = $contentObjectAttribute->attribute( 'object_version' );
             // get include date
             if( isset( $data['include'] ) )
             {
@@ -39,7 +39,7 @@ class eZPublishEventType extends eZDataType
                             try
                             {
                                 $starttime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'start', $contentObjectAttribute->LanguageCode );
-                                $validate = $this->validateDateTime( $now, $starttime );
+                                $validate = $this->validateDateTime( $now, false, $starttime );
                                 if( isset( $validate['state'] ) )
                                 {
                                     if( trim( $includeItem['enddate'] ) != '' )
@@ -76,7 +76,7 @@ class eZPublishEventType extends eZDataType
                                             $endtime->setTime( trim( $includeItem['endtime-hour'] ), 00 );
                                         }
                                     }
-                                    $validate = $this->validateDateTime( $now, $starttime, $endtime );
+                                    $validate = $this->validateDateTime( $now, $version, $starttime, $endtime );
                                     if( isset( $validate['state'] ) )
                                     {
                                         $include[$key] = array( 'start' => $starttime->format( eZPublishEvent::DATE_FORMAT ),
@@ -113,55 +113,55 @@ class eZPublishEventType extends eZDataType
                         $contentObjectAttribute->setValidationError( $validate['error'] );
                         return eZInputValidator::STATE_INVALID;
                     }
-                    if( isset( $data['exclude'] ) )
+                }
+            }
+            if( isset( $data['exclude'] ) )
+            {
+                foreach( $data['exclude'] as $key => $excludeItem )
+                {
+                    $validate = array();
+                    if( isset( $excludeItem['startdate'] ) && trim( $excludeItem['startdate'] ) != '' && isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) != '' )
                     {
-                        foreach( $data['exclude'] as $key => $excludeItem )
+                        $timeString = trim( $excludeItem['startdate'] ) . ' 00';
+                        $starttimeExc = eZPublishEvent::createDateTime( $timeString, null, 'start', $contentObjectAttribute->LanguageCode );
+                        $validate = $this->validateDateTime( $now, false, $starttimeExc );
+                        if( isset( $validate['state'] ) )
                         {
-                            $validate = array();
-                            if( isset( $excludeItem['startdate'] ) && trim( $excludeItem['startdate'] ) != '' && isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) != '' )
+                            $timeString = trim( $excludeItem['enddate'] ) . ' 00';
+                            $endtimeExc = eZPublishEvent::createDateTime( $timeString, null, 'end', $contentObjectAttribute->LanguageCode );
+                            $validate = $this->validateDateTime( $now, $version, $starttimeExc, $endtimeExc );
+                            if( isset( $validate['state'] ) )
                             {
-                                $timeString = trim( $excludeItem['startdate'] ) . ' 00';
-                                $starttimeExc = eZPublishEvent::createDateTime( $timeString, null, 'start', $contentObjectAttribute->LanguageCode );
-                                $validate = $this->validateDateTime( $now, $starttimeExc );
-                                if( isset( $validate['state'] ) )
-                                {
-                                    $timeString = trim( $excludeItem['enddate'] ) . ' 00';
-                                    $endtimeExc = eZPublishEvent::createDateTime( $timeString, null, 'end', $contentObjectAttribute->LanguageCode );
-                                    $validate = $this->validateDateTime( $now, $starttimeExc, $endtimeExc );
-                                    if( isset( $validate['state'] ) )
-                                    {
-                                        $exclude[$key] = array( 'start' => $starttimeExc->format( eZPublishEvent::DATE_FORMAT ),
-                                                                'end' => $endtimeExc->format( eZPublishEvent::DATE_FORMAT ) );
-                                    }
-                                }
-                            }
-                            elseif( isset( $excludeItem['startdate'] ) && trim( $excludeItem['startdate'] ) != '' && isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) == '' )
-                            {
-                                $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'Select an end date.' );
-                            }
-                            if( isset( $validate['error'] ) )
-                            {
-                                $contentObjectAttribute->setValidationError( $validate['error'] );
-                                return eZInputValidator::STATE_INVALID;
+                                $exclude[$key] = array( 'start' => $starttimeExc->format( eZPublishEvent::DATE_FORMAT ),
+                                                        'end' => $endtimeExc->format( eZPublishEvent::DATE_FORMAT ) );
                             }
                         }
                     }
-                    if( isset( $include ) && count( $include ) > 0 )
+                    elseif( isset( $excludeItem['startdate'] ) && trim( $excludeItem['startdate'] ) != '' && isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) == '' )
                     {
-                        ksort( $include );
-                        $data_array['include'] = $include;
+                        $validate['error'] = ezpI18n::tr( 'extension/ezpublish-event', 'Select an end date.' );
                     }
-                    if( isset( $exclude ) && count( $exclude ) > 0 )
+                    if( isset( $validate['error'] ) )
                     {
-                        ksort( $exclude );
-                        $data_array['exclude'] = $exclude;
-                    }
-                    if( count( $data_array ) > 0 )
-                    {
-                        $jsonString = json_encode( $data_array );
-                        $contentObjectAttribute->setAttribute( 'data_text', $jsonString );
+                        $contentObjectAttribute->setValidationError( $validate['error'] );
+                        return eZInputValidator::STATE_INVALID;
                     }
                 }
+            }
+            if( isset( $include ) && count( $include ) > 0 )
+            {
+                ksort( $include );
+                $data_array['include'] = $include;
+            }
+            if( isset( $exclude ) && count( $exclude ) > 0 )
+            {
+                ksort( $exclude );
+                $data_array['exclude'] = $exclude;
+            }
+            if( count( $data_array ) > 0 )
+            {
+                $jsonString = json_encode( $data_array );
+                $contentObjectAttribute->setAttribute( 'data_text', $jsonString );
             }
         }
         return eZInputValidator::STATE_ACCEPTED;
@@ -276,7 +276,7 @@ class eZPublishEventType extends eZDataType
         return $contentObjectAttribute->attribute( 'data_text' );
     }
 
-    function validateDateTime( $now, $checktime1, $checktime2 = false )
+    function validateDateTime( $now, $version, $checktime1, $checktime2 = false )
     {
         if( $checktime1 instanceof DateTime && ( $checktime2 === false || ( $checktime2 !== false && $checktime2 instanceof DateTime ) ) )
         {
@@ -287,7 +287,7 @@ class eZPublishEventType extends eZDataType
             #}
             if( $checktime2 !== false )
             {
-                if( $checktime2->getTimestamp() < $now )
+                if( $checktime2->getTimestamp() < $now && $version !== false && $version->Version == 1 )
                 {
                     return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Select an end date in the future.' ) );
                 }
