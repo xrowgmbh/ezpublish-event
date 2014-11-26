@@ -157,7 +157,9 @@ if(isset($classidentifier))
                                     $object_versions= $object->versions(true);
                                     foreach($object_versions as $object_version)
                                     {
-                                        $dataMap = $object_version->dataMap();
+                                      $ob_test=eZContentObject::fetch($object_version->ContentObjectID);
+                                      if(count($ob_test->attribute( 'data_map' ))!=0)
+                                      { $dataMap = $object_version->dataMap();
                                         if( isset( $dataMap[$eventfield] ) )
                                         {
                                             if( isset( $dataMap[$startfield] ) && isset( $dataMap[$endfield] ) )
@@ -165,16 +167,16 @@ if(isset($classidentifier))
                                                 $startdate = $dataMap[$startfield];
                                                 $enddate = $dataMap[$endfield];
                                                 $start = new DateTime();
-                                                $start->setTimestamp($startdate->attribute( 'data_int' ));
+                                                $start->setTimestamp($startdate->DataInt);
                                                 $end = new DateTime();
-                                                $end->setTimestamp($enddate->attribute( 'data_int' ));
+                                                $end->setTimestamp($enddate->DataInt);
                                                 $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
                                                                                               'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
                                                 $jsonString = json_encode( $include );
                                                 $dataMap[$eventfield]->setAttribute( 'data_text', $jsonString );
                                                 $dataMap[$eventfield]->store();
                                                 $object_version->store();
-                                                $cli->output( "Set value for Object " . $object_version->ID );
+                                                $cli->output( "Set value for Object " . $object_version->ContentObjectID );
                                               }
                                               else
                                               {
@@ -182,14 +184,24 @@ if(isset($classidentifier))
                                                   $script->shutdown( 1 );
                                                   //continue;
                                               }
+
+                                              if( $ob_test instanceof eZContentObject)
+                                              {
+                                                  eZPublishEventSearch::update( $ob_test );
+                                              }
                                           }
                                           else
                                           {
                                                $cli->error( "eventfield has to be in the data map of the node" );
-                                               $script->shutdown( 1 );
+                                               echo "damaged Object".$object_version->ContentObjectID."***********";
+                                               //$script->shutdown( 1 );
                                               // echo $eventfield;
-                                              // continue;
+                                               continue;
                                           }
+                                       }else{
+                                           echo "damaged Object".$object_version->ContentObjectID."++++++++++++++" ;
+                                           continue;
+                                       }
                                      }
                                  }
                              }

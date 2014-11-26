@@ -8,26 +8,28 @@ class eZPublishEventSearch
         if($ezpublishevent_ini->hasVariable( 'Settings', 'EventClassIdentifier' ))
         {
             $classidentifier = $ezpublishevent_ini->variable( 'Settings', 'EventClassIdentifier' );
-            if ($object->ClassIdentifier == $classidentifier)
+            if ($object->ClassIdentifier == $classidentifier && $object->Status == 1)
             {
                 $client = eZPublishSolarium::createSolariumClient();
                 $query = $client->createSelect();
+                $update = $client->createUpdate();
                 
                 $query->setQuery('meta_id_si:' . $object->ID);
                 $resulttest = $client->select($query);
                 
                 if ($resulttest->getNumFound() != 0) {
-                    $update = $client->createUpdate();
                     $update->addDeleteQuery('meta_id_si:' . $object->ID);
                     $deleteResult = $client->update($update);
                 }
                 
                 $ezpEvent = new eZPublishEvent();
-                $update = $client->createUpdate();
                 $docList = $ezpEvent->createSOLRDocument($object, $update);
                 $update->addDocuments($docList);
-                $update->addCommit();
-                $result = $client->update($update);
+                if($commit)
+                {
+                   $update->addCommit();
+                   $result = $client->update($update);
+                }
                 unset($docList);
             }
         }
