@@ -70,9 +70,12 @@ class eZPublishEvent
         $fieldsForSOLRIndex = $this->eZPEventINI->variable( 'CronjobSettings', 'FieldsForSOLRIndex' );
         $contentObject=eZContentObject::fetch($object->ID);
         $node=eZContentObjectTreeNode::fetch( $contentObject->attribute('main_node_id'));
-        $dataMap = $node->dataMap();
-        $long_date=$dataMap["long_dated"];
-        $prices_string = $dataMap["gratis"];
+        if($node)
+        {
+            $dataMap = $node->dataMap();
+            $long_date=$dataMap["long_dated"];
+            $prices_string = $dataMap["gratis"];
+        }
         if( isset( $dataMap[$attributeName] ) )
         {
             $ezpevent = $dataMap[$attributeName];
