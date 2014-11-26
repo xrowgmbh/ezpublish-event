@@ -786,7 +786,7 @@ var appendPeriod = function(element, div, findPrefix, removeButtonID) {
         var content = $('#'+div+'_'+index).html(),
             next_index = ezpeCounter[findPrefix];
         //window.console.log('appendPeriod index '+index+' next index '+next_index+' ezpeCounter['+findPrefix+'] '+ezpeCounter[findPrefix]);
-        content = replaceIndex(content, findPrefix, element, index, next_index);
+        content = replaceIndex(content, findPrefix, element, index, next_index, true);
         // add new node after this
         var newHTML = '<div id='+div+'_'+next_index+'>'+content+'</div>';
         if(index == 0)
@@ -833,23 +833,39 @@ var initializeDefault = function(index, findPrefix, element, div, removeButtonID
         removePeriod($(this), div, findPrefix, element, removeButtonID);
     });
 };
-var replaceIndex = function(content, findPrefix, element, index, new_index) {
+var replaceIndex = function(content, findPrefix, element, index, new_index, removeValue) {
     var findArray = {0: findPrefix+'\\]\\['+index,
                      1: 'period_'+index,
                      2: 'date_'+index,
                      3: 'days_'+index,
                      4: 'exclude_'+index,
                      5: 'data-index="'+index+'"',
-                     6: ' hasDatepicker',
-                     7: 'value=".*?"'},
+                     6: ' hasDatepicker'},
         replaceArray = {0: findPrefix+'\]\['+new_index,
                         1: 'period_'+new_index,
                         2: 'date_'+new_index,
                         3: 'days_'+new_index,
                         4: 'exclude_'+new_index,
                         5: 'data-index="'+new_index+'"',
-                        6: '',
-                        7: 'value=""'};
+                        6: ''};
+     if(removeValue) {
+        var findArray = {0: findPrefix+'\\]\\['+index,
+                         1: 'period_'+index,
+                         2: 'date_'+index,
+                         3: 'days_'+index,
+                         4: 'exclude_'+index,
+                         5: 'data-index="'+index+'"',
+                         6: ' hasDatepicker',
+                         7: 'value=".*?"'},
+            replaceArray = {0: findPrefix+'\]\['+new_index,
+                            1: 'period_'+new_index,
+                            2: 'date_'+new_index,
+                            3: 'days_'+new_index,
+                            4: 'exclude_'+new_index,
+                            5: 'data-index="'+new_index+'"',
+                            6: '',
+                            7: 'value=""'};
+    }
     if(typeof content !== 'undefined') {
         for (key in findArray) {
             var regex = new RegExp(findArray[key], 'g'),

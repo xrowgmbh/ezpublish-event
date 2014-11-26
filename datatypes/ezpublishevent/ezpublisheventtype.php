@@ -54,7 +54,7 @@ class eZPublishEventType extends eZDataType
                                             $timeString .= ' 00';
                                         }
                                         $endtime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'end', $contentObjectAttribute->LanguageCode );
-                                        if( $includeItem['startdate'] == $includeItem['enddate'] && trim( $includeItem['endtime-hour'] ) == '' )
+                                        if( $includeItem['startdate'] == $includeItem['enddate'] && ( trim( $includeItem['endtime-hour'] ) == '' || trim( $includeItem['endtime-hour'] ) == '00' ) )
                                         {
                                             $endtime->modify( '+1 day' );
                                         }

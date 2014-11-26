@@ -343,6 +343,13 @@ class eZPublishEvent
                             $timeString .= ' 00';
                         }
                         $endtime = eZPublishEvent::createDateTime( $timeString, $ezpeventIncludeItem, 'end', $languageCode );
+                        if( $endtime instanceof DateTime )
+                        {
+                            if( $ezpeventIncludeItem['startdate'] == $ezpeventIncludeItem['enddate'] && ( trim( $ezpeventIncludeItem['endtime-hour'] ) == '' || trim( $ezpeventIncludeItem['endtime-hour'] ) == '00' ) )
+                            {
+                                $endtime->modify( '+1 day' );
+                            }
+                        }
                     }
                     else
                     {
