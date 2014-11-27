@@ -46,15 +46,15 @@ class eZPublishEvent
             {
                 $dateFormatArray = $ezpe_ini->variable( 'Settings', 'DateFormat' );
                 $timeFormatArray = $ezpe_ini->variable( 'Settings', 'TimeFormat' );
+                $dateFormatItem = $dateFormatArray['default'];
+                $timeFormatItem = $timeFormatArray['default'];
                 if( isset( $dateFormatArray[$locale] ) )
                 {
-                    $dateFormat = preg_replace( '/%/', '', $dateFormatArray[$locale] );
-                    self::$currentDateFormat = $dateFormat . ' ' . preg_replace( '/%/', '', $timeFormatArray[$locale] );
+                    $dateFormatItem = $dateFormatArray[$locale];
+                    $timeFormatItem = $timeFormatArray[$locale];
                 }
-                else
-                {
-                    return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Please set your locale in dateformat in ezpublishevent.ini' ) );
-                }
+                $dateFormat = preg_replace( '/%/', '', $dateFormatItem );
+                self::$currentDateFormat = $dateFormat . ' ' . preg_replace( '/%/', '', $timeFormatItem );
             }
             else
             {
