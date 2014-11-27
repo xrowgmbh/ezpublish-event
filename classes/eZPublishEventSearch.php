@@ -28,8 +28,8 @@ class eZPublishEventSearch
                 if($commit)
                 {
                    $update->addCommit();
-                   $result = $client->update($update);
                 }
+                $result = $client->update($update);
                 unset($docList);
             }
         }
