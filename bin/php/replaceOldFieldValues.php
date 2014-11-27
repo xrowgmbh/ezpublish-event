@@ -197,10 +197,10 @@ if(isset($classidentifier))
                                                           $script->shutdown( 1 );
                                                           //continue;
                                                     }
-
-                                                    if( $object_version instanceof eZContentObjectVersion )
+                                                    $ob_test = eZContentObject::fetch($object_version->ContentObjectID);
+                                                    if( $ob_test instanceof eZContentObject )
                                                     {
-                                                        eZPublishEventSearch::update( $object_version );
+                                                        eZPublishEventSearch::update( $ob_test );
                                                     }
                                                 }
                                                 else
