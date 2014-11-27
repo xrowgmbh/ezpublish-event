@@ -198,7 +198,7 @@ if(isset($classidentifier))
                                                           //continue;
                                                     }
 
-                                                    if( $object_version instanceof eZContentObject)
+                                                    if( $object_version instanceof eZContentObjectVersion )
                                                     {
                                                         eZPublishEventSearch::update( $object_version );
                                                     }
