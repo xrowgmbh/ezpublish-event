@@ -276,6 +276,14 @@ class eZPublishEventType extends eZDataType
         return $contentObjectAttribute->attribute( 'data_text' );
     }
 
+    /*!
+     Sets the default value.
+    */
+    function initializeObjectAttribute( $contentObjectAttribute, $currentVersion, $originalContentObjectAttribute )
+    {
+        $contentObjectAttribute->setAttribute( "data_text", $originalContentObjectAttribute->attribute( "data_text" ) );
+    }
+
     function validateDateTime( $now, $version, $checktime1, $checktime2 = false )
     {
         if( $checktime1 instanceof DateTime && ( $checktime2 === false || ( $checktime2 !== false && $checktime2 instanceof DateTime ) ) )

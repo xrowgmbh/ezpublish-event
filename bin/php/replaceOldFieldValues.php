@@ -176,42 +176,20 @@ if(isset($classidentifier))
                                                 }
                                                 if( isset( $eventfieldAttr ) )
                                                 {
-                                                    $fetchInput = true;
-                                                    $contentClassAttribute = $eventfieldAttr->contentClassAttribute();
-                                                    // Check if this is a translation
-                                                    $currentLanguage = $eventfieldAttr->attribute( 'language_code' );
-                                                    $isTranslation = false;
-                                                    if ( $currentLanguage != $defaultLanguage )
-                                                        $isTranslation = true;
-                                                    // If current attribute is an un-translateable translation, input should not be fetched
-                                                    if ( $isTranslation == true )
-                                                    {
-                                                        if ( !$contentClassAttribute->attribute( 'can_translate' ) )
-                                                        {
-                                                            $fetchInput = false;
-                                                        }
-                                                    }
                                                     if( isset( $startdateAttr ) && isset( $enddateAttr ) )
                                                     {
-                                                        if( $fetchInput )
-                                                        {
-                                                            $start = new DateTime();
-                                                            $start->setTimestamp( $startdateAttr->DataInt );
-                                                            $end = new DateTime();
-                                                            $end->setTimestamp( $enddateAttr->DataInt );
-                                                            $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
-                                                                                                              'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
-                                                            $data_text = json_encode( $include );
-                                                        }
-                                                        else
-                                                        {
-                                                            $data_text = '';
-                                                        }
+                                                        $start = new DateTime();
+                                                        $start->setTimestamp( $startdateAttr->DataInt );
+                                                        $end = new DateTime();
+                                                        $end->setTimestamp( $enddateAttr->DataInt );
+                                                        $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
+                                                                                                          'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
+                                                        $data_text = json_encode( $include );
                                                         $eventfieldAttr->setAttribute( 'data_text', $data_text );
+                                                        $eventfieldAttr->setAttribute( 'language_id', $startdateAttr->LanguageID );
                                                         $eventfieldAttr->store();
                                                         $object_version->store();
                                                         $cli->output( "Set value for Object " . $object_version->ContentObjectID . ', Version ' . $object_version->Version . ' => ' . $translation->LanguageCode . ' can_translate: ' . $fetchInput . ' data_text ' . $data_text );
-                                                        
                                                     }
                                                     else
                                                     {
