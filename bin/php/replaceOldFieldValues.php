@@ -81,35 +81,6 @@ if(isset($classidentifier))
                 $eventfield = $options['eventfield'];
             if(isset($eventfield))
             {
-                $objects = eZContentObject::fetchList( true, array( 'contentclass_id' => 43 ) );
-                if( count( $objects ) > 0 )
-                {
-                    $cli->output( "Start fetching " . count( $objects ). " " . $classidentifier );
-                    foreach( $objects as $object )
-                    {
-                        if( $object instanceof eZContentObject )
-                        {
-                            $object_versions = $object->versions();
-                            foreach( $object_versions as $object_version )
-                            {
-                                $allTranslations = $object_version->translations();
-                                foreach( $allTranslations as $translation )
-                                {
-                                    $contentObjectAttributes = $object_version->contentObjectAttributes( $translation );
-                                    if( count( $contentObjectAttributes ) > 0 )
-                                    {
-                                        var_dump($contentObjectAttributes);
-                                        if( isset( $contentObjectAttributes[$eventfield] ) )
-                                        {
-                                            
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                die();
                 // chech if attribute is set
                 $eventattribute = $class->fetchAttributeByIdentifier($eventfield);
                 if($eventattribute === null)
@@ -186,30 +157,61 @@ if(isset($classidentifier))
                                     $object_versions = $object->versions();
                                     foreach( $object_versions as $object_version )
                                     {
+                                        $defaultLanguage = $object_version->initialLanguageCode();
                                         $allTranslations = $object_version->translations();
                                         foreach( $allTranslations as $translation )
                                         {
-                                            $contentObjectAttributes = $object_version->contentObjectAttributes( $translation );
+                                            $contentObjectAttributes = $object_version->contentObjectAttributes( $translation->LanguageCode );
                                             if( count( $contentObjectAttributes ) > 0 )
-                                            { 
-                                                var_dump($contentObjectAttributes);
-                                                if( isset( $contentObjectAttributes[$eventfield] ) )
+                                            {
+                                                
+                                                foreach( $contentObjectAttributes as $contentObjectAttribute )
                                                 {
-                                                    if( isset( $contentObjectAttributes[$startfield] ) && isset( $contentObjectAttributes[$endfield] ) )
+                                                    if( $contentObjectAttribute->ContentClassAttributeIdentifier == $eventfield )
+                                                        $eventfieldAttr = $contentObjectAttribute;
+                                                    if( $contentObjectAttribute->ContentClassAttributeIdentifier == $startfield )
+                                                        $startdateAttr = $contentObjectAttribute;
+                                                    if( $contentObjectAttribute->ContentClassAttributeIdentifier == $endfield )
+                                                        $enddateAttr = $contentObjectAttribute;
+                                                }
+                                                if( isset( $eventfieldAttr ) )
+                                                {
+                                                    $fetchInput = true;
+                                                    $contentClassAttribute = $eventfieldAttr->contentClassAttribute();
+                                                    // Check if this is a translation
+                                                    $currentLanguage = $eventfieldAttr->attribute( 'language_code' );
+                                                    $isTranslation = false;
+                                                    if ( $currentLanguage != $defaultLanguage )
+                                                        $isTranslation = true;
+                                                    // If current attribute is an un-translateable translation, input should not be fetched
+                                                    if ( $isTranslation == true )
                                                     {
-                                                        $startdate = $contentObjectAttributes[$startfield];
-                                                        $enddate = $contentObjectAttributes[$endfield];
-                                                        $start = new DateTime();
-                                                        $start->setTimestamp($startdate->DataInt);
-                                                        $end = new DateTime();
-                                                        $end->setTimestamp($enddate->DataInt);
-                                                        $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
-                                                                                                          'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
-                                                        $jsonString = json_encode( $include );
-                                                        $contentObjectAttributes[$eventfield]->setAttribute( 'data_text', $jsonString );
-                                                        $contentObjectAttributes[$eventfield]->store();
+                                                        if ( !$contentClassAttribute->attribute( 'can_translate' ) )
+                                                        {
+                                                            $fetchInput = false;
+                                                        }
+                                                    }
+                                                    if( isset( $startdateAttr ) && isset( $enddateAttr ) )
+                                                    {
+                                                        if( $fetchInput )
+                                                        {
+                                                            $start = new DateTime();
+                                                            $start->setTimestamp( $startdateAttr->DataInt );
+                                                            $end = new DateTime();
+                                                            $end->setTimestamp( $enddateAttr->DataInt );
+                                                            $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
+                                                                                                              'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
+                                                            $data_text = json_encode( $include );
+                                                        }
+                                                        else
+                                                        {
+                                                            $data_text = '';
+                                                        }
+                                                        $eventfieldAttr->setAttribute( 'data_text', $data_text );
+                                                        $eventfieldAttr->store();
                                                         $object_version->store();
-                                                        $cli->output( "Set value for Object " . $object_version->ContentObjectID );
+                                                        $cli->output( "Set value for Object " . $object_version->ContentObjectID . ', Version ' . $object_version->Version . ' => ' . $translation->LanguageCode . ' can_translate: ' . $fetchInput . ' data_text ' . $data_text );
+                                                        
                                                     }
                                                     else
                                                     {
@@ -217,10 +219,10 @@ if(isset($classidentifier))
                                                           $script->shutdown( 1 );
                                                           //continue;
                                                     }
-    
-                                                    if( $ob_test instanceof eZContentObject)
+
+                                                    if( $object_version instanceof eZContentObject)
                                                     {
-                                                        eZPublishEventSearch::update( $ob_test );
+                                                        eZPublishEventSearch::update( $object_version );
                                                     }
                                                 }
                                                 else
@@ -239,6 +241,11 @@ if(isset($classidentifier))
                                             }
                                         }
                                     }
+                                    /*if(count($allTranslations) > 1){
+                                        var_dump($jsonString);
+                                        var_dump($object_version);
+                                        die();
+                                    }*/
                                  }
                              }
                          }
