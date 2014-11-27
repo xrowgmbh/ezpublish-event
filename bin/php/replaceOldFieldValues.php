@@ -32,7 +32,7 @@ $script->initialize();
 $ini = eZINI::instance( 'site.ini' );
 $userCreatorID = $ini->variable( 'UserSettings', 'UserCreatorID' );
 $user = eZUser::fetch( $userCreatorID );
-if ( !$user )
+if (!$user)
 {
     $cli->error( "Cannot get user object by userID = '$userCreatorID'.\n(See site.ini[UserSettings].UserCreatorID)" );
     $script->shutdown( 1 );
@@ -52,7 +52,8 @@ if(!isset($options['classidentifier']))
         $script->shutdown( 1 );
     }
 }
-else{
+else
+{
     $classidentifier = $options['classidentifier'];
 }
 if(isset($classidentifier))
@@ -80,16 +81,44 @@ if(isset($classidentifier))
                 $eventfield = $options['eventfield'];
             if(isset($eventfield))
             {
+                $objects = eZContentObject::fetchList( true, array( 'contentclass_id' => 43 ) );
+                if( count( $objects ) > 0 )
+                {
+                    $cli->output( "Start fetching " . count( $objects ). " " . $classidentifier );
+                    foreach( $objects as $object )
+                    {
+                        if( $object instanceof eZContentObject )
+                        {
+                            $object_versions = $object->versions();
+                            foreach( $object_versions as $object_version )
+                            {
+                                $allTranslations = $object_version->translations();
+                                foreach( $allTranslations as $translation )
+                                {
+                                    $contentObjectAttributes = $object_version->contentObjectAttributes( $translation );
+                                    if( count( $contentObjectAttributes ) > 0 )
+                                    {
+                                        var_dump($contentObjectAttributes);
+                                        if( isset( $contentObjectAttributes[$eventfield] ) )
+                                        {
+                                            
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                die();
                 // chech if attribute is set
-                
                 $eventattribute = $class->fetchAttributeByIdentifier($eventfield);
                 if($eventattribute === null)
                 {
                     $attrCreateInfo = array(
                             'identifier' => $eventfield,
                             'name' => 'Eventdaten',
-                            'can_translate' => 1,
-                            'is_required' => 0,
+                            'can_translate' => 0,
+                            'is_required' => 1,
                             'is_searchable' => 0
                     );
                     $eventattribute = eZPublishEvent::addEventAttribute( $class, $attrCreateInfo );
@@ -146,7 +175,7 @@ if(isset($classidentifier))
                                          'ClassFilterType' => 'include',
                                          'ClassFilterArray' => array( $classidentifier ) );
                         $nodes = eZContentObjectTreeNode::subTreeByNodeID( $params, $parentNodeID );*/
-                        $objects=eZContentObject::fetchList(true,array('contentclass_id'=>43));
+                        $objects = eZContentObject::fetchList(true,array('contentclass_id'=>43));
                         if( count( $objects ) > 0 )
                         {
                             $cli->output( "Start fetching " . count( $objects ). " " . $classidentifier );
@@ -154,55 +183,62 @@ if(isset($classidentifier))
                             {
                                 if( $object instanceof eZContentObject )
                                 {
-                                    $object_versions= $object->versions(true);
-                                    foreach($object_versions as $object_version)
+                                    $object_versions = $object->versions();
+                                    foreach( $object_versions as $object_version )
                                     {
-                                      $ob_test=eZContentObject::fetch($object_version->ContentObjectID);
-                                      if(count($ob_test->attribute( 'data_map' ))!=0)
-                                      { $dataMap = $object_version->dataMap();
-                                        if( isset( $dataMap[$eventfield] ) )
+                                        $allTranslations = $object_version->translations();
+                                        foreach( $allTranslations as $translation )
                                         {
-                                            if( isset( $dataMap[$startfield] ) && isset( $dataMap[$endfield] ) )
+                                            $contentObjectAttributes = $object_version->contentObjectAttributes( $translation );
+                                            if( count( $contentObjectAttributes ) > 0 )
+                                            { 
+                                                var_dump($contentObjectAttributes);
+                                                if( isset( $contentObjectAttributes[$eventfield] ) )
+                                                {
+                                                    if( isset( $contentObjectAttributes[$startfield] ) && isset( $contentObjectAttributes[$endfield] ) )
+                                                    {
+                                                        $startdate = $contentObjectAttributes[$startfield];
+                                                        $enddate = $contentObjectAttributes[$endfield];
+                                                        $start = new DateTime();
+                                                        $start->setTimestamp($startdate->DataInt);
+                                                        $end = new DateTime();
+                                                        $end->setTimestamp($enddate->DataInt);
+                                                        $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
+                                                                                                          'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
+                                                        $jsonString = json_encode( $include );
+                                                        $contentObjectAttributes[$eventfield]->setAttribute( 'data_text', $jsonString );
+                                                        $contentObjectAttributes[$eventfield]->store();
+                                                        $object_version->store();
+                                                        $cli->output( "Set value for Object " . $object_version->ContentObjectID );
+                                                    }
+                                                    else
+                                                    {
+                                                          $cli->error( "startfield and endfield have to be in the data map of the node" );
+                                                          $script->shutdown( 1 );
+                                                          //continue;
+                                                    }
+    
+                                                    if( $ob_test instanceof eZContentObject)
+                                                    {
+                                                        eZPublishEventSearch::update( $ob_test );
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    $cli->error( "eventfield has to be in the data map of the node" );
+                                                    echo "damaged Object".$object_version->ContentObjectID."***********";
+                                                    //$script->shutdown( 1 );
+                                                    // echo $eventfield;
+                                                    continue;
+                                                }
+                                            }
+                                            else
                                             {
-                                                $startdate = $dataMap[$startfield];
-                                                $enddate = $dataMap[$endfield];
-                                                $start = new DateTime();
-                                                $start->setTimestamp($startdate->DataInt);
-                                                $end = new DateTime();
-                                                $end->setTimestamp($enddate->DataInt);
-                                                $include = array( 'include' => array( 0 => array( 'start' => $start->format( eZPublishEvent::DATE_FORMAT ),
-                                                                                              'end' => $end->format( eZPublishEvent::DATE_FORMAT ) ) ) );
-                                                $jsonString = json_encode( $include );
-                                                $dataMap[$eventfield]->setAttribute( 'data_text', $jsonString );
-                                                $dataMap[$eventfield]->store();
-                                                $object_version->store();
-                                                $cli->output( "Set value for Object " . $object_version->ContentObjectID );
-                                              }
-                                              else
-                                              {
-                                                  $cli->error( "startfield and endfield have to be in the data map of the node" );
-                                                  $script->shutdown( 1 );
-                                                  //continue;
-                                              }
-
-                                              if( $ob_test instanceof eZContentObject)
-                                              {
-                                                  eZPublishEventSearch::update( $ob_test );
-                                              }
-                                          }
-                                          else
-                                          {
-                                               $cli->error( "eventfield has to be in the data map of the node" );
-                                               echo "damaged Object".$object_version->ContentObjectID."***********";
-                                               //$script->shutdown( 1 );
-                                              // echo $eventfield;
-                                               continue;
-                                          }
-                                       }else{
-                                           echo "damaged Object".$object_version->ContentObjectID."++++++++++++++" ;
-                                           continue;
-                                       }
-                                     }
+                                                echo "damaged Object".$object_version->ContentObjectID."++++++++++++++" ;
+                                                continue;
+                                            }
+                                        }
+                                    }
                                  }
                              }
                          }
