@@ -170,7 +170,7 @@ jQuery(document).ready(function() {
         var free_event='';
         var long_event='';
         var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
-
+        var local = $('.local_language').val();
         $.each(facetlist_temp,function(i,fd)
         {
             if(fd.name=='sort_type'){
@@ -192,7 +192,7 @@ jQuery(document).ready(function() {
             }
         });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
         var url = '/event/searchevent';
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
@@ -223,7 +223,7 @@ jQuery(document).ready(function() {
                     var newcontent = '';
                     var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                  'sort_type':sorttype,'offset':page_index};
+                                  'sort_type':sorttype,'offset':page_index,'local':local};
                     if(page_index >= 1)
                     {   
                         $("#Pagination .prev img").remove();
@@ -311,6 +311,7 @@ jQuery(document).ready(function() {
             var event_city='';
             var free_event='';
             var long_event='';
+            var local = $('.local_language').val();
             var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
 
             $.each(facetlist_temp,function(i,fd)
@@ -334,7 +335,7 @@ jQuery(document).ready(function() {
                 }
              });
             var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                         'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+                         'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
             var url = '/event/searchevent';
             $("#search_results").children().remove();
             $("#search_results").addClass("is_loading");
@@ -365,7 +366,7 @@ jQuery(document).ready(function() {
                         var newcontent = '';
                         var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                       'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                      'sort_type':sorttype,'offset':page_index};
+                                      'sort_type':sorttype,'offset':page_index,'local':local};
                         if(page_index >= 1)
                         {   
                             $("#Pagination .prev img").remove();
@@ -451,6 +452,7 @@ jQuery(document).ready(function() {
         var event_city='';
         var free_event='';
         var long_event='';
+        var local = $('.local_language').val();
         var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
 
         $.each(facetlist_temp,function(i,fd)
@@ -474,7 +476,7 @@ jQuery(document).ready(function() {
             }
          });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
         var url = '/event/searchevent';
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
@@ -505,7 +507,7 @@ jQuery(document).ready(function() {
                     var newcontent = '';
                     var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                  'sort_type':sorttype,'offset':page_index};
+                                  'sort_type':sorttype,'offset':page_index,'local':local};
                     if(page_index >= 1)
                     {   
                         $("#Pagination .prev img").remove();
@@ -590,6 +592,7 @@ jQuery(document).ready(function() {
         var event_city='';
         var free_event='';
         var long_event='';
+        var local = $('.local_language').val();
         var facetlist_temp=$('.content-searchevent .search_form').serializeArray();
 
         $.each(facetlist_temp,function(i,fd)
@@ -613,7 +616,7 @@ jQuery(document).ready(function() {
             }
          });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
         var url = '/event/searchevent';
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
@@ -644,7 +647,7 @@ jQuery(document).ready(function() {
                     var newcontent = '';
                     var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                  'sort_type':sorttype,'offset':page_index};
+                                  'sort_type':sorttype,'offset':page_index,'local':local};
                     if(page_index >= 1)
                     {   
                         $("#Pagination .prev img").remove();
