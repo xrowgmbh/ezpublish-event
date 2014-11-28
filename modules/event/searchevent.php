@@ -86,6 +86,13 @@ if( $http->hasVariable('offset') && $http->hasVariable('offset')!="")
     $Offset= 0;
 }
 
+if( $http->hasVariable('local'))
+{
+    $local = $http->variable('local');
+}else{
+    $local = "";
+}
+
 $client = eZPublishSolarium::createSolariumClient();
 $query = $client->createSelect();
 
@@ -124,8 +131,13 @@ if($sort_type == "event/date")
             $single_key=5;
         }
         $compare=$date_temp[0];
-        $tpl->setVariable( "objectid", $document["meta_id_si"] );
-        array_push($template_array,array($facet_date,preg_replace('/[\x20]{4,4}/', '', $tpl->fetch( "design:node/view/search_event.tpl" )),$single_key));
+        $object=eZContentObject::fetch( $document["meta_id_si"] );
+        if($object->canRead())
+        {
+            $tpl->setVariable( "objectid", $document["meta_id_si"] );
+            $tpl->setVariable( "local", $local );
+            array_push($template_array,array($facet_date,preg_replace('/[\x20]{4,4}/', '', $tpl->fetch( "design:node/view/search_event.tpl" )),$single_key));
+        }
     }
     $global_facet_arrays=array("result_nummer"=>$sum_nr,'facet_list'=>$template_array);
 }else{
@@ -161,8 +173,13 @@ if($sort_type == "event/date")
     
     foreach($facet as $value => $count) 
     {
-        $tpl->setVariable( "objectid", $value );
-        array_push($template_array,array("",preg_replace('/[\x20]{4,4}/', '', $tpl->fetch( "design:node/view/search_event.tpl" )),"5"));
+        $object=eZContentObject::fetch( $value );
+        if($object->canRead())
+        {
+            $tpl->setVariable( "objectid", $value );
+            $tpl->setVariable( "local", $local );
+            array_push($template_array,array("",preg_replace('/[\x20]{4,4}/', '', $tpl->fetch( "design:node/view/search_event.tpl" )),"5"));
+        }
     }
     $global_facet_arrays=array("result_nummer"=>$summer,'facet_list'=>$template_array);
 }
