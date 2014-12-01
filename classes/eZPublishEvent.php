@@ -16,50 +16,36 @@ class eZPublishEvent
         $this->FieldsForSOLRIndex = $this->eZPEventINI->variable( 'CronjobSettings', 'FieldsForSOLRIndex' );
     }
 
-    static function createDateTime( $timeString, $includeItem, $type, $locale )
+    static function createDateTime( $timeString, $dataItem, $type )
     {
-        $currentDateFormat = self::getCurrentDateFormat( $locale );
-        if( is_string( $currentDateFormat ) )
+        $currentDateFormat = self::getCurrentDateFormat();
+        if( trim( $dataItem[$type.'time-minute'] ) != '' )
         {
-            if( isset( $includeItem[$type.'time-minute'] ) && trim($includeItem[$type.'time-minute']) != '' )
+            if( is_numeric( trim( $dataItem[$type.'time-minute'] ) ) )
             {
-                $timeString .= ':' . trim( $includeItem[$type.'time-minute'] ) . ':00';
+                $timeString .= ':' . trim( $dataItem[$type.'time-minute'] ) . ':00';
             }
-            else
+            elseif( isset( $currentDateFormat['error'] ) )
             {
-                $timeString .= ':00:00';
+                throw new Exception( ezpI18n::tr( 'extension/ezpublish-event', 'Select a numeric time.' ) );
             }
-            return DateTime::createFromFormat( $currentDateFormat, $timeString );
         }
-        elseif( isset( $currentDateFormat['error'] ) )
+        else
         {
-            throw new Exception( $currentDateFormat['error'] );
+            $timeString .= ':00:00';
         }
+        return DateTime::createFromFormat( $currentDateFormat, $timeString );
     }
 
-    static private function getCurrentDateFormat( $locale )
+    static private function getCurrentDateFormat()
     {
         if( self::$currentDateFormat === null )
         {
-            $ezpe_ini = eZINI::instance( 'ezpublishevent.ini' );
-            if( $ezpe_ini->hasVariable( 'Settings', 'DateFormat' ) )
-            {
-                $dateFormatArray = $ezpe_ini->variable( 'Settings', 'DateFormat' );
-                $timeFormatArray = $ezpe_ini->variable( 'Settings', 'TimeFormat' );
-                $dateFormatItem = $dateFormatArray['default'];
-                $timeFormatItem = $timeFormatArray['default'];
-                if( isset( $dateFormatArray[$locale] ) )
-                {
-                    $dateFormatItem = $dateFormatArray[$locale];
-                    $timeFormatItem = $timeFormatArray[$locale];
-                }
-                $dateFormat = preg_replace( '/%/', '', $dateFormatItem );
-                self::$currentDateFormat = $dateFormat . ' ' . preg_replace( '/%/', '', $timeFormatItem );
-            }
-            else
-            {
-                return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Please set a dateformat in ezpublishevent.ini' ) );
-            }
+            $locale = eZLocale::instance();
+            $dateFormatItem = $locale->ShortDateFormat;
+            $timeFormatItem = $locale->TimeFormat;
+            $dateFormat = preg_replace( '/%/', '', $dateFormatItem );
+            self::$currentDateFormat = $dateFormat . ' ' . preg_replace( '/%/', '', $timeFormatItem );
         }
         return self::$currentDateFormat;
     }
@@ -320,70 +306,137 @@ class eZPublishEvent
         return $newAttribute;
     }
 
-    static function getEndTimestamp( $object, $http )
+    static function getEndTimestampForWorkflow( $object, $http )
     {
         if( $http->hasPostVariable( 'ezpeventdate_attr_id' ) )
         {
-            $languageCode = $object->initialLanguageCode();
             if ( $http->hasPostVariable( 'ContentObjectAttribute_ezpeventdate_data_' . $http->postVariable( 'ezpeventdate_attr_id' ) ) )
             {
                 $ezpevent = $http->postVariable( 'ContentObjectAttribute_ezpeventdate_data_' . $http->postVariable( 'ezpeventdate_attr_id' ) );
-                $lastenddate = 0;
-                foreach( $ezpevent['include'] as $key => $ezpeventIncludeItem )
+                $dateData = self::getFirstLastIncludeTimestamp( $ezpevent, 'lastenddate' );
+                if( isset( $dateData['lastenddate'] ) && $dateData['lastenddate'] !== false )
                 {
-                    if( trim( $ezpeventIncludeItem['enddate'] ) != '' )
-                    {
-                        $timeString = trim( $ezpeventIncludeItem['enddate'] );
-                        if( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' )
-                        {
-                            $timeString .= ' ' . trim( $ezpeventIncludeItem['endtime-hour'] );
-                        }
-                        else
-                        {
-                            $timeString .= ' 00';
-                        }
-                        $endtime = eZPublishEvent::createDateTime( $timeString, $ezpeventIncludeItem, 'end', $languageCode );
-                        if( $endtime instanceof DateTime )
-                        {
-                            if( $ezpeventIncludeItem['startdate'] == $ezpeventIncludeItem['enddate'] && ( trim( $ezpeventIncludeItem['endtime-hour'] ) == '' || trim( $ezpeventIncludeItem['endtime-hour'] ) == '00' ) )
-                            {
-                                $endtime->modify( '+1 day' );
-                            }
-                        }
-                    }
-                    else
-                    {
-                        $timeString = trim( $ezpeventIncludeItem['startdate'] ) . ' ' . trim( $ezpeventIncludeItem['starttime-hour'] );
-                        $starttime = eZPublishEvent::createDateTime( $timeString, $ezpeventIncludeItem, 'start', $languageCode );
-                        if( $starttime instanceof DateTime )
-                        {
-                            $endtime = clone $starttime;
-                            if( trim( $ezpeventIncludeItem['endtime-hour'] ) == '00' || trim( $ezpeventIncludeItem['endtime-hour'] ) == '' )
-                            {
-                                $endtime->modify( '+1 day' );
-                                $endtime->setTime( 00, 00 );
-                            }
-                            elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) != '' )
-                            {
-                                $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), trim( $ezpeventIncludeItem['endtime-minute'] ) );
-                            }
-                            elseif( trim( $ezpeventIncludeItem['endtime-hour'] ) != '' && trim( $ezpeventIncludeItem['endtime-minute'] ) == '' )
-                            {
-                                $endtime->setTime( trim( $ezpeventIncludeItem['endtime-hour'] ), 00 );
-                            }
-                        }
-                    }
-                    if( $endtime instanceof DateTime )
-                    {
-                        $endtimestamp = $endtime->getTimestamp();
-                        if( $endtimestamp > $lastenddate || $lastenddate == 0 )
-                            $lastenddate = $endtimestamp;
-                    }
+                    if( ( $object->CurrentVersion > 1 && $dateData['lastenddate'] > 0 ) || ( $object->CurrentVersion == 1 && $dateData['lastenddate'] > time() ) )
+                        return $dateData['lastenddate'];
                 }
-                if( ( $object->CurrentVersion > 1 && $lastenddate > 0 ) || ( $object->CurrentVersion == 1 && $lastenddate > time() ) )
-                    return $lastenddate;
             }
         }
         return false;
+    }
+    
+    static function getFirstLastIncludeTimestamp( $data, $index )
+    {
+        $firststartdate = $lastenddate = 0;
+        #die(var_dump($data));
+        foreach( $data['include'] as $key => $ezpeventItem )
+        {
+            if( trim( $ezpeventItem['startdate'] ) != '' && trim( $ezpeventItem['starttime-hour'] ) != '' )
+            {
+                $timeString = trim( $ezpeventItem['startdate'] ) . ' ' . trim( $ezpeventItem['starttime-hour'] );
+                $starttime = eZPublishEvent::createDateTime( $timeString, $ezpeventItem, 'start' );
+                if( trim( $ezpeventItem['enddate'] ) != '' )
+                {
+                    $timeString = trim( $ezpeventItem['enddate'] );
+                    if( trim( $ezpeventItem['endtime-hour'] ) != '' )
+                    {
+                        $timeString .= ' ' . trim( $ezpeventItem['endtime-hour'] );
+                    }
+                    else
+                    {
+                        $timeString .= ' 00';
+                    }
+                    $endtime = eZPublishEvent::createDateTime( $timeString, $ezpeventItem, 'end' );
+                    if( $endtime instanceof DateTime )
+                    {
+                        if( $ezpeventItem['startdate'] == $ezpeventItem['enddate'] && ( trim( $ezpeventItem['endtime-hour'] ) == '' || trim( $ezpeventItem['endtime-hour'] ) == '00' ) )
+                        {
+                            $endtime->modify( '+1 day' );
+                        }
+                    }
+                }
+                else
+                {
+                    if( $starttime instanceof DateTime )
+                    {
+                        $endtime = clone $starttime;
+                        if( trim( $ezpeventItem['endtime-hour'] ) == '00' || trim( $ezpeventItem['endtime-hour'] ) == '' )
+                        {
+                            $endtime->modify( '+1 day' );
+                            $endtime->setTime( 00, 00 );
+                        }
+                        elseif( trim( $ezpeventItem['endtime-hour'] ) != '' && trim( $ezpeventItem['endtime-minute'] ) != '' )
+                        {
+                            $endtime->setTime( trim( $ezpeventItem['endtime-hour'] ), trim( $ezpeventItem['endtime-minute'] ) );
+                        }
+                        elseif( trim( $ezpeventItem['endtime-hour'] ) != '' && trim( $ezpeventItem['endtime-minute'] ) == '' )
+                        {
+                            $endtime->setTime( trim( $ezpeventItem['endtime-hour'] ), 00 );
+                        }
+                    }
+                }
+                if( $endtime instanceof DateTime )
+                {
+                    $endtimestamp = $endtime->getTimestamp();
+                    if( count( $ezpeventItem['weekdays'] ) > 0 && count( $ezpeventItem['weekdays'] ) < 7 )
+                    {
+                        $endtimeTmp = self::checkWeekday( $endtime, $ezpeventItem['weekdays'], $index );
+                        $endtimestamp = $endtimeTmp->getTimestamp();
+                        unset($endtimeTmp);
+                    }
+                    if( $endtimestamp > $lastenddate || $lastenddate == 0 )
+                        $lastenddate = $endtimestamp;
+                }
+                if( $starttime instanceof DateTime )
+                {
+                    $starttimestamp = $starttime->getTimestamp();
+                    if( count( $ezpeventItem['weekdays'] ) > 0 && count( $ezpeventItem['weekdays'] ) < 7 )
+                    {
+                        $starttimeTmp = self::checkWeekday( $starttime, $ezpeventItem['weekdays'], $index );
+                        $starttimestamp = $starttimeTmp->getTimestamp();
+                        unset($starttimeTmp);
+                    }
+                    if( $starttimestamp < $firststartdate || $firststartdate == 0 )
+                        $firststartdate = $starttimestamp;
+                }
+                switch( $index )
+                {
+                    case 'both':
+                        return array( 'firststartdate' => $firststartdate, 'lastenddate' => $lastenddate );
+                    break;
+                    case 'firststartdate':
+                        return array( 'firststartdate' => $firststartdate );
+                        break;
+                    case 'lastenddate':
+                        return array( 'lastenddate' => $lastenddate );
+                        break;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    static function checkWeekday( DateTime $dateTime, $weekdays, $index )
+    {
+        $weekday = $dateTime->format( 'D' );
+        if( isset( $weekdays[$weekday] ) )
+        {
+            return $dateTime->getTimestamp();
+        }
+        else
+        {
+            if( $index == 'firststartdate' )
+            {
+                $dateTime->modify( '+1 day' );
+            }
+            if( $index == 'lastenddate' )
+            {
+                $dateTime->modify( '-1 day' );
+            }
+            self::checkWeekday( $dateTime, $weekdays, $index );
+        }
     }
 }

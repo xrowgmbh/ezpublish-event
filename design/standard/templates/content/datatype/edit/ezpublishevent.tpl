@@ -1,10 +1,9 @@
-{def $locale = fetch('content', 'locale')
-     $indexInc = 0
+{def $indexInc = 0
      $indexExc = 0
-     $dateFormatArray = ezini( 'Settings', 'DateFormat', 'ezpublishevent.ini' )
-     $dateFormat = $dateFormatArray[$locale.locale_code]
-     $timeFormatArray = ezini( 'Settings', 'TimeFormat', 'ezpublishevent.ini' )
-     $timeFormat = $timeFormatArray[$locale.locale_code]}
+     $weekdayShortNames = ezini( 'Settings', 'WeekdayShortNames', 'ezpublishevent.ini' )
+     $localeVars = ezpevent_locale_vars( array( 'ShortDateFormat', 'ShortTimeFormat', 'HTTPLocaleCode' ) )
+     $dateFormat = $localeVars['ShortDateFormat']
+     $timeFormat = $localeVars['ShortTimeFormat']}
 {if ezhttp_hasvariable( concat( $attribute_base, '_ezpeventdate_data_', $attribute.id ), 'post' )}
     {def $postData = ezhttp( concat( $attribute_base, '_ezpeventdate_data_', $attribute.id ), 'post' )}
     {if is_set( $postData.include )}
@@ -25,8 +24,8 @@
 {/if}
 {ezcss_require(array('jquery-ui.css', 'xrowevent.css'))}
 {ezscript_require(array('ezjsc::jqueryUI', 'xrowevent.js'))}
-<input type="hidden" class="ezpevent" id="ezpevent{$attribute.id}" data-attrid="{$attribute.id}" data-locale="{$locale.http_locale_code|extract(0,2)}" />
-<input type="hidden" value="{$locale.http_locale_code|extract(0,2)}" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[locale]" class="ezpeventdate_data_locale" />
+<input type="hidden" class="ezpevent" id="ezpevent{$attribute.id}" data-attrid="{$attribute.id}" data-locale="{$localeVars['HTTPLocaleCode']|extract(0,2)}" />
+<input type="hidden" value="{$localeVars['HTTPLocaleCode']|extract(0,2)}" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[locale]" class="ezpeventdate_data_locale" />
 <input type="hidden" value="{$attribute.id}" name="ezpeventdate_attr_id" />
 <fieldset>
     <legend>{'Periods'|i18n( 'extension/ezpublish-event' )}</legend>

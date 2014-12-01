@@ -73,12 +73,12 @@
         <source>Set a start time.</source>
         <translation>Bitte setzen Sie eine Startzeit.</translation>
     </message>
-        <message>
+    <message>
         <source>Select an end date.</source>
         <translation>Bitte wählen Sie ein Enddatum.</translation>
     </message>
     <message>
-        <source>Select an end time newer then the start time.</source>
+        <source>Select an end date newer then the start date.</source>
         <translation>Bitte wählen Sie ein Enddatum, welches nach dem Startdatum ist.</translation>
     </message>
     <message>
@@ -90,16 +90,12 @@
         <translation>Bitte wählen Sie ein Enddatum, welches in der Zukunft liegt.</translation>
     </message>
     <message>
-        <source>Maximum period of an event is one year.</source>
-        <translation>Die maximale Dauer einer Veranstaltung ist ein Jahr.</translation>
+        <source>Maximum period of an event is exceeded.</source>
+        <translation>Die maximale Dauer einer Veranstaltung ist überschritten.</translation>
     </message>
     <message>
-        <source>Select a end date in the future.</source>
-        <translation>Bitte wählen Sie ein Enddatum, welches in der Zukunft liegt.</translation>
-    </message>
-    <message>
-        <source>Select an end date.</source>
-        <translation>Bitte wählen Sie ein Enddatum.</translation>
+        <source>Select a numeric time.</source>
+        <translation>Bitte setzen Sie eine Zeit, die aus Zahlen besteht.</translation>
     </message>
 </context>
 </TS>

@@ -38,7 +38,7 @@ class eZPublishEventType extends eZDataType
                             $timeString = trim( $includeItem['startdate'] ) . ' ' . trim( $includeItem['starttime-hour'] );
                             try
                             {
-                                $starttime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'start', $contentObjectAttribute->LanguageCode );
+                                $starttime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'start' );
                                 $validate = $this->validateDateTime( $now, false, $starttime );
                                 if( isset( $validate['state'] ) )
                                 {
@@ -53,7 +53,7 @@ class eZPublishEventType extends eZDataType
                                         {
                                             $timeString .= ' 00';
                                         }
-                                        $endtime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'end', $contentObjectAttribute->LanguageCode );
+                                        $endtime = eZPublishEvent::createDateTime( $timeString, $includeItem, 'end' );
                                         if( $includeItem['startdate'] == $includeItem['enddate'] && ( trim( $includeItem['endtime-hour'] ) == '' || trim( $includeItem['endtime-hour'] ) == '00' ) )
                                         {
                                             $endtime->modify( '+1 day' );
@@ -76,18 +76,19 @@ class eZPublishEventType extends eZDataType
                                             $endtime->setTime( trim( $includeItem['endtime-hour'] ), 00 );
                                         }
                                     }
-                                    $validate = $this->validateDateTime( $now, $version, $starttime, $endtime );
+                                    $ezpublisheventIni = eZINI::instance( 'ezpublishevent.ini' );
+                                    $validate = $this->validateDateTime( $now, $version, $starttime, $endtime, $ezpublisheventIni );
                                     if( isset( $validate['state'] ) )
                                     {
                                         $include[$key] = array( 'start' => $starttime->format( eZPublishEvent::DATE_FORMAT ),
                                                                 'end' => $endtime->format( eZPublishEvent::DATE_FORMAT ) );
-                                        if( isset( $includeItem['weekdays'] ) && count( $includeItem['weekdays'] ) < 7 )
+                                        if( isset( $includeItem['weekdays'] ) && count( $includeItem['weekdays'] ) > 0 && count( $includeItem['weekdays'] ) < 7 )
                                         {
-                                            $weekdayNames = array( 0 => 'Mon', 1 => 'Tue', 2 => 'Wed', 3 => 'Thu', 4 => 'Fri', 5 => 'Sat', 6 => 'Sun' );
+                                            $weekdayShortNames = $ezpublisheventIni->variable( 'Settings', 'WeekdayShortNames' );
                                             $weekdays = array();
                                             foreach( $includeItem['weekdays'] as $index => $weekday )
                                             {
-                                                $weekdays[] = $weekdayNames[$index];
+                                                $weekdays[] = $weekdayShortNames[$index];
                                             }
                                             $include[$key]['weekdays'] = $weekdays;
                                         }
@@ -123,13 +124,15 @@ class eZPublishEventType extends eZDataType
                     if( isset( $excludeItem['startdate'] ) && trim( $excludeItem['startdate'] ) != '' && isset( $excludeItem['enddate'] ) && trim( $excludeItem['enddate'] ) != '' )
                     {
                         $timeString = trim( $excludeItem['startdate'] ) . ' 00';
-                        $starttimeExc = eZPublishEvent::createDateTime( $timeString, null, 'start', $contentObjectAttribute->LanguageCode );
+                        $starttimeExc = eZPublishEvent::createDateTime( $timeString, null, 'start' );
                         $validate = $this->validateDateTime( $now, false, $starttimeExc );
                         if( isset( $validate['state'] ) )
                         {
                             $timeString = trim( $excludeItem['enddate'] ) . ' 00';
-                            $endtimeExc = eZPublishEvent::createDateTime( $timeString, null, 'end', $contentObjectAttribute->LanguageCode );
-                            $validate = $this->validateDateTime( $now, $version, $starttimeExc, $endtimeExc );
+                            $endtimeExc = eZPublishEvent::createDateTime( $timeString, null, 'end' );
+                            if( !isset( $ezpublisheventIni ) || !$ezpublisheventIni instanceof eZINI )
+                                $ezpublisheventIni = eZINI::instance( 'ezpublishevent.ini' );
+                            $validate = $this->validateDateTime( $now, $version, $starttimeExc, $endtimeExc, $ezpublisheventIni );
                             if( isset( $validate['state'] ) )
                             {
                                 $exclude[$key] = array( 'start' => $starttimeExc->format( eZPublishEvent::DATE_FORMAT ),
@@ -186,7 +189,6 @@ class eZPublishEventType extends eZDataType
         if( isset( $contentTmp->include ) && count( $contentTmp->include ) > 0 )
         {
             $include = array();
-            $firststartdate = $lastenddate = 0;
             foreach( $contentTmp->include as $key => $contentIncludeItem )
             {
                 // initialize include
@@ -208,16 +210,9 @@ class eZPublishEventType extends eZDataType
                     }
                     $include[$key]['weekdays'] = $weekdays;
                 }
-                // get the first start date and the last end date of all periods
-                if( $starttimestamp < $firststartdate || $firststartdate == 0 )
-                {
-                    $firststartdate = $starttimestamp;
-                }
-                if( $endtimestamp > $lastenddate || $lastenddate == 0 )
-                {
-                    $lastenddate = $endtimestamp;
-                }
             }
+            // get the first start date and the last end date of all periods
+            $firstAndLastIncludeTimestamp = eZPublishEvent::getFirstLastIncludeTimestamp( (array)$contentTmp->include, 'both' );
         }
         if( isset( $contentTmp->exclude ) && count( $contentTmp->exclude ) > 0 )
         {
@@ -243,13 +238,13 @@ class eZPublishEventType extends eZDataType
         {
             $content['json']['exclude'] = $exclude;
         }
-        if( isset( $firststartdate ) )
+        if( isset( $firstAndLastIncludeTimestamp['firststartdate'] ) )
         {
-            $content['perioddetails']['firststartdate'] = $firststartdate;
+            $content['perioddetails']['firststartdate'] = $firstAndLastIncludeTimestamp['firststartdate'];
         }
-        if( isset( $lastenddate ) )
+        if( isset( $firstAndLastIncludeTimestamp['lastenddate'] ) )
         {
-            $content['perioddetails']['lastenddate'] = $lastenddate;
+            $content['perioddetails']['lastenddate'] = $firstAndLastIncludeTimestamp['lastenddate'];
         }
         return $content;
     }
@@ -284,30 +279,28 @@ class eZPublishEventType extends eZDataType
         $contentObjectAttribute->setAttribute( "data_text", $originalContentObjectAttribute->attribute( "data_text" ) );
     }
 
-    function validateDateTime( $now, $version, $checktime1, $checktime2 = false )
+    function validateDateTime( $now, $version, $checktime1, $checktime2 = false, $ezpublisheventIni = false )
     {
         if( $checktime1 instanceof DateTime && ( $checktime2 === false || ( $checktime2 !== false && $checktime2 instanceof DateTime ) ) )
         {
-            // validation for start time in the future disabled because you should change content of an event during the whole period
-            #if( $checktime2 === false && $checktime1->getTimestamp() < $now )
-            #{
-            #    return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Select a start date in the future.' ) );
-            #}
             if( $checktime2 !== false )
             {
+                $maxPeriodForEvent = '+1 year';
+                if( $ezpublisheventIni->hasVariable( 'Settings', 'MaxPeriodForEvent' ) )
+                    $maxPeriodForEvent = $ezpublisheventIni->variable( 'Settings', 'MaxPeriodForEvent' );
                 if( $checktime2->getTimestamp() < $now && $version !== false && $version->Version == 1 )
                 {
                     return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Select an end date in the future.' ) );
                 }
                 if( $checktime1->getTimestamp() > $checktime2->getTimestamp() )
                 {
-                    return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Select an end time newer then the start time.' ) );
+                    return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Select an end date newer then the start date.' ) );
                 }
                 $tmpChecktime1 = clone $checktime1;
-                $tmpChecktime1->modify( '+1 year' );
+                $tmpChecktime1->modify( $maxPeriodForEvent );
                 if( $tmpChecktime1->getTimestamp() < $checktime2->getTimestamp() )
                 {
-                    return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Maximum period of an event is one year.' ) );
+                    return array( 'error' => ezpI18n::tr( 'extension/ezpublish-event', 'Maximum period of an event is exceeded.' ) );
                 }
             }
         }

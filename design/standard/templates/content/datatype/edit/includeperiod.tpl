@@ -13,7 +13,7 @@
                       'endtimeHour', $item.endtime|datetime( 'custom', '%H' ),
                       'endtimeMinute', $item.endtime|datetime( 'custom', '%i' ) )}
 {elseif is_set( $item.enddate )}
-{def $days = $item|ezpevent_show_weekdays( $attribute.language_code )
+{def $days = $item|ezpevent_show_weekdays()
      $endtime = hash( 'enddate', $item.enddate,
                       'endtimeHour', $item.endtime-hour,
                       'endtimeMinute', $item.endtime-minute )}
@@ -44,25 +44,25 @@
         <div class="weekdays" id="ezpeventperiodweekdays_{$index}"{if and( is_set( $days ), $days|ge( 3 ) )} style="display: block"{/if}>
             <div class="weekdaysheader">{'On this weekdays'|i18n( 'extension/ezpublish-event' )}:</div>
             <label for="Monday" class="labelweekday">
-                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.0 ), $item.weekdays.0|eq('') ), $item.weekdays|contains( 'Mon' ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][0]" value="Mon">{'Monday'|i18n( 'design/admin/content/translationview' )}
+                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.0 ), $item.weekdays.0|eq('') ), $item.weekdays|contains( $weekdayShortNames[$item.weekdays.0] ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][0]" value="{$weekdayShortNames[$item.weekdays.0]}">{'Monday'|i18n( 'design/admin/content/translationview' )}
             </label>
             <label for="Tuesday" class="labelweekday">
-                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.1 ), $item.weekdays.1|eq('') ), $item.weekdays|contains( 'Tue' ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][1]" value="Tue">{'Tuesday'|i18n( 'extension/ezpublish-event' )}
+                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.1 ), $item.weekdays.1|eq('') ), $item.weekdays|contains( $weekdayShortNames[$item.weekdays.1] ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][1]" value="{$weekdayShortNames[$item.weekdays.1]}">{'Tuesday'|i18n( 'extension/ezpublish-event' )}
             </label>
             <label for="Wednesday" class="labelweekday">
-                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.2 ), $item.weekdays.2|eq('') ), $item.weekdays|contains( 'Wed' ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][2]" value="Wed">{'Wednesday'|i18n( 'extension/ezpublish-event' )}
+                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.2 ), $item.weekdays.2|eq('') ), $item.weekdays|contains( $weekdayShortNames[$item.weekdays.2] ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][2]" value="{$weekdayShortNames[$item.weekdays.2]}">{'Wednesday'|i18n( 'extension/ezpublish-event' )}
             </label>
             <label for="Thursday" class="labelweekday">
-                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.3 ), $item.weekdays.3|eq('') ), $item.weekdays|contains( 'Thu' ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][3]" value="Thu">{'Thursday'|i18n( 'extension/ezpublish-event' )}
+                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.3 ), $item.weekdays.3|eq('') ), $item.weekdays|contains( $weekdayShortNames[$item.weekdays.3] ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][3]" value="{$weekdayShortNames[$item.weekdays.3]}">{'Thursday'|i18n( 'extension/ezpublish-event' )}
             </label>
             <label for="Friday" class="labelweekday">
-                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.4 ), $item.weekdays.4|eq('') ), $item.weekdays|contains( 'Fri' ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][4]" value="Fri">{'Friday'|i18n( 'extension/ezpublish-event' )}
+                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.4 ), $item.weekdays.4|eq('') ), $item.weekdays|contains( $weekdayShortNames[$item.weekdays.4] ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][4]" value="{$weekdayShortNames[$item.weekdays.4]}">{'Friday'|i18n( 'extension/ezpublish-event' )}
             </label>
             <label for="Saturday" class="labelweekday">
-                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.5 ), $item.weekdays.5|eq('') ), $item.weekdays|contains( 'Sat' ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][5]" value="Sat">{'Saturday'|i18n( 'extension/ezpublish-event' )}
+                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.5 ), $item.weekdays.5|eq('') ), $item.weekdays|contains( $weekdayShortNames[$item.weekdays.5] ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][5]" value="{$weekdayShortNames[$item.weekdays.5]}">{'Saturday'|i18n( 'extension/ezpublish-event' )}
             </label>
             <label for="Sunday" class="labelweekday lastelement">
-                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.6 ), $item.weekdays.6|eq('') ), $item.weekdays|contains( 'Sun' ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][6]" value="Sun">{'Sunday'|i18n( 'design/admin/content/translationview' )}
+                <input type="checkbox" {if or( is_set( $item )|not(), and( is_set( $item ), or( and( is_set( $item.weekdays ), or( and( is_set( $item.weekdays.6 ), $item.weekdays.6|eq('') ), $item.weekdays|contains( $weekdayShortNames[$item.weekdays.6] ) ) ), is_set( $item.weekdays )|not() ) ) )}checked {/if}size="3" maxlength="2" name="{$attribute_base}_ezpeventdate_data_{$attribute.id}[include][{$index}][weekdays][6]" value="{$weekdayShortNames[$item.weekdays.6]}">{'Sunday'|i18n( 'design/admin/content/translationview' )}
             </label>
             <div style="clear: both"></div>
         </div>
