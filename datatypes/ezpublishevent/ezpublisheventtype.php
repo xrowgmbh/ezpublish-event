@@ -189,6 +189,7 @@ class eZPublishEventType extends eZDataType
         if( isset( $contentTmp->include ) && count( $contentTmp->include ) > 0 )
         {
             $include = array();
+            $firststartdate = $lastenddate = 0;
             foreach( $contentTmp->include as $key => $contentIncludeItem )
             {
                 // initialize include
@@ -210,9 +211,30 @@ class eZPublishEventType extends eZDataType
                     }
                     $include[$key]['weekdays'] = $weekdays;
                 }
+                // get the first start date and the last end date of all periods
+                if( $starttimestamp < $firststartdate || $firststartdate == 0 )
+                {
+                    $firststartdate = $starttimestamp;
+                    if( isset( $include[$key]['weekdays'] ) && count( $include[$key]['weekdays'] ) > 0 && count( $include[$key]['weekdays'] ) < 7 )
+                    {
+                        $starttimeTmp = clone $startdate;
+                        eZPublishEvent::checkWeekday( $starttimeTmp, $include[$key]['weekdays'], 'firststartdate' );
+                        $firststartdate = $starttimeTmp->getTimestamp();
+                        unset($starttimeTmp);
+                    }
+                }
+                if( $endtimestamp > $lastenddate || $lastenddate == 0 )
+                {
+                    $lastenddate = $endtimestamp;
+                    if( isset( $include[$key]['weekdays'] ) && count( $include[$key]['weekdays'] ) > 0 && count( $include[$key]['weekdays'] ) < 7 )
+                    {
+                        $endtimeTmp = clone $enddate;
+                        eZPublishEvent::checkWeekday( $endtimeTmp, $include[$key]['weekdays'], 'lastenddate' );
+                        $lastenddate = $endtimeTmp->getTimestamp();
+                        unset($endtimeTmp);
+                    }
+                }
             }
-            // get the first start date and the last end date of all periods
-            $firstAndLastIncludeTimestamp = eZPublishEvent::getFirstLastIncludeTimestamp( (array)$contentTmp->include, 'both' );
         }
         if( isset( $contentTmp->exclude ) && count( $contentTmp->exclude ) > 0 )
         {
@@ -238,14 +260,15 @@ class eZPublishEventType extends eZDataType
         {
             $content['json']['exclude'] = $exclude;
         }
-        if( isset( $firstAndLastIncludeTimestamp['firststartdate'] ) )
+        if( $firststartdate > 0 )
         {
-            $content['perioddetails']['firststartdate'] = $firstAndLastIncludeTimestamp['firststartdate'];
+            $content['perioddetails']['firststartdate'] = $firststartdate;
         }
-        if( isset( $firstAndLastIncludeTimestamp['lastenddate'] ) )
+        if( $lastenddate > 0 )
         {
-            $content['perioddetails']['lastenddate'] = $firstAndLastIncludeTimestamp['lastenddate'];
+            $content['perioddetails']['lastenddate'] = $lastenddate;
         }
+        #die(var_dump($content));
         return $content;
     }
 

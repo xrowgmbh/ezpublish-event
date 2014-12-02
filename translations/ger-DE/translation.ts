@@ -14,12 +14,28 @@
         <translation>Enddatum</translation>
     </message>
     <message>
+        <source>Start</source>
+        <translation>Start</translation>
+    </message>
+    <message>
+        <source>End</source>
+        <translation>Ende</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Uhrzeit</translation>
+    </message>
+    <message>
         <source>from</source>
         <translation>von</translation>
     </message>
     <message>
         <source>to</source>
         <translation>bis</translation>
+    </message>
+    <message>
+        <source>starting from</source>
+        <translation>ab</translation>
     </message>
     <message>
         <source>On this weekdays</source>
@@ -50,6 +66,34 @@
         <translation>Samstag</translation>
     </message>
     <message>
+        <source>Mondays</source>
+        <translation>montags</translation>
+    </message>
+    <message>
+        <source>Tuesdays</source>
+        <translation>dienstags</translation>
+    </message>
+    <message>
+        <source>Wednesdays</source>
+        <translation>mittwochs</translation>
+    </message>
+    <message>
+        <source>Thursdays</source>
+        <translation>donnerstags</translation>
+    </message>
+    <message>
+        <source>Fridays</source>
+        <translation>freitags</translation>
+    </message>
+    <message>
+        <source>Saturdays</source>
+        <translation>samstags</translation>
+    </message>
+    <message>
+        <source>Sundays</source>
+        <translation>sonntags</translation>
+    </message>
+    <message>
         <source>Exclude periods</source>
         <translation>Zeiträume ausschließen</translation>
     </message>
@@ -58,12 +102,24 @@
         <translation>Weitere Zeiträume ausschließen</translation>
     </message>
     <message>
+        <source>Excluded periods</source>
+        <translation>Ausgeschlossene Zeiträume</translation>
+    </message>
+    <message>
         <source>Add new period</source>
         <translation>Weitere Zeiträume</translation>
     </message>
     <message>
         <source>Choose date</source>
         <translation>Datum wählen</translation>
+    </message>
+    <message>
+        <source>First date</source>
+        <translation>Erster Tag</translation>
+    </message>
+    <message>
+        <source>Last date</source>
+        <translation>Letzter Tag</translation>
     </message>
     <message>
         <source>Select a start date.</source>
