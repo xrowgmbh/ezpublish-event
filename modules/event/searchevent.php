@@ -86,13 +86,6 @@ if( $http->hasVariable('offset') && $http->hasVariable('offset')!="")
     $Offset= 0;
 }
 
-if( $http->hasVariable('local'))
-{
-    $local = $http->variable('local');
-}else{
-    $local = "";
-}
-
 $client = eZPublishSolarium::createSolariumClient();
 $query = $client->createSelect();
 
@@ -132,10 +125,10 @@ if($sort_type == "event/date")
         }
         $compare=$date_temp[0];
         $object=eZContentObject::fetch( $document["meta_id_si"] );
-        if($object->canRead())
+        $obj_datamap=$object->dataMap();
+        if(!empty($obj_datamap) && $object->canRead())
         {
-            $tpl->setVariable( "objectid", $document["meta_id_si"] );
-            $tpl->setVariable( "local", $local );
+            $tpl->setVariable( "object",$object);
             array_push($template_array,array($facet_date,preg_replace('/[\x20]{4,4}/', '', $tpl->fetch( "design:node/view/search_event.tpl" )),$single_key));
         }
     }
@@ -174,10 +167,10 @@ if($sort_type == "event/date")
     foreach($facet as $value => $count) 
     {
         $object=eZContentObject::fetch( $value );
-        if($object->canRead())
+        $obj_datamap=$object->dataMap();
+        if(!empty($obj_datamap) && $object->canRead())
         {
-            $tpl->setVariable( "objectid", $value );
-            $tpl->setVariable( "local", $local );
+            $tpl->setVariable( "object", $object );
             array_push($template_array,array("",preg_replace('/[\x20]{4,4}/', '', $tpl->fetch( "design:node/view/search_event.tpl" )),"5"));
         }
     }

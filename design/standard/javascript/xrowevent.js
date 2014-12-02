@@ -192,8 +192,8 @@ jQuery(document).ready(function() {
             }
         });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
-        var url = '/event/searchevent';
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+        var url = window.location.pathname + "event";
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
         var aj=$.ajax({
@@ -223,7 +223,7 @@ jQuery(document).ready(function() {
                     var newcontent = '';
                     var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                  'sort_type':sorttype,'offset':page_index,'local':local};
+                                  'sort_type':sorttype,'offset':page_index};
                     if(page_index >= 1)
                     {   
                         $("#Pagination .prev img").remove();
@@ -335,8 +335,8 @@ jQuery(document).ready(function() {
                 }
              });
             var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                         'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
-            var url = '/event/searchevent';
+                         'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+            var url = window.location.pathname + "event";
             $("#search_results").children().remove();
             $("#search_results").addClass("is_loading");
             var aj=$.ajax({
@@ -366,7 +366,7 @@ jQuery(document).ready(function() {
                         var newcontent = '';
                         var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                       'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                      'sort_type':sorttype,'offset':page_index,'local':local};
+                                      'sort_type':sorttype,'offset':page_index};
                         if(page_index >= 1)
                         {   
                             $("#Pagination .prev img").remove();
@@ -476,8 +476,8 @@ jQuery(document).ready(function() {
             }
          });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
-        var url = '/event/searchevent';
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+        var url = window.location.pathname + "event";
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
         var aj=$.ajax({
@@ -507,7 +507,7 @@ jQuery(document).ready(function() {
                     var newcontent = '';
                     var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                  'sort_type':sorttype,'offset':page_index,'local':local};
+                                  'sort_type':sorttype,'offset':page_index};
                     if(page_index >= 1)
                     {   
                         $("#Pagination .prev img").remove();
@@ -616,8 +616,8 @@ jQuery(document).ready(function() {
             }
          });
         var param = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
-                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype,'local':local};
-        var url = '/event/searchevent';
+                     'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,'sort_type':sorttype};
+        var url = window.location.pathname + "event";
         $("#search_results").children().remove();
         $("#search_results").addClass("is_loading");
         var aj=$.ajax({
@@ -647,7 +647,7 @@ jQuery(document).ready(function() {
                     var newcontent = '';
                     var params = {'event_city':event_city,'fromDate':fromDate,'toDate':toDate,'SubTreeArray':subtreearray,
                                   'SearchText':searchtext_temp,'long_event':long_event,'free_event':free_event,
-                                  'sort_type':sorttype,'offset':page_index,'local':local};
+                                  'sort_type':sorttype,'offset':page_index};
                     if(page_index >= 1)
                     {   
                         $("#Pagination .prev img").remove();
