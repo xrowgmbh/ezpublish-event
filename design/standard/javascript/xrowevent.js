@@ -746,15 +746,17 @@ var initDate = function(element) {
                 if($.trim($(this).val()) == '')
                     $('#ezpeventperiodweekdays_'+$(this).data('index')).hide();
                 if($('#startdate_'+$(this).data('index')).length) {
-                    var startDateVal = $('#startdate_'+$(this).data('index')).val(),
-                        startDate = parseDate(startDateVal),
-                        endDate = parseDate(dateText);
-                    var days = (endDate-startDate)/86400000;
-                    if(days >= 3) {
-                        $('#ezpeventperiodweekdays_'+$(this).data('index')).show();
-                    }
-                    if(days < 3) {
-                        $('#ezpeventperiodweekdays_'+$(this).data('index')).hide();
+                    if($('#startdate_'+$(this).data('index')).val() != '') {
+                        var startDateVal = $('#startdate_'+$(this).data('index')).val(),
+                            startDate = parseDate(startDateVal),
+                            endDate = parseDate(dateText);
+                        var days = (endDate-startDate)/86400000;
+                        if(days >= 3) {
+                            $('#ezpeventperiodweekdays_'+$(this).data('index')).show();
+                        }
+                        else {
+                            $('#ezpeventperiodweekdays_'+$(this).data('index')).hide();
+                        }
                     }
                 }
             }

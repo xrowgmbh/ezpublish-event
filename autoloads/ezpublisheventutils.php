@@ -52,25 +52,30 @@ class eZPEventUtils
                 break;
             case 'ezpevent_show_weekdays':
                 $item = $operatorValue;
-                if( !isset( $item['starttime-hour'] ) || ( isset( $item['starttime-hour'] ) && $item['starttime-hour'] == '' ) )
-                    $item['starttime-hour'] = ' 00';
-                if( $item['enddate'] == '' )
-                    $item['enddate'] = trim( $item['startdate'] );
-                if( !isset( $item['endtime-hour'] ) || ( isset( $item['endtime-hour'] ) && $item['endtime-hour'] == '' ) )
-                    $item['endtime-hour'] = ' 00';
-                $startTimeString = trim( $item['startdate'] ) . ' ' . trim( $item['starttime-hour'] );
-                $tmpStarttime = eZPublishEvent::createDateTime( $startTimeString, $item, 'start' );
-                if( $tmpStarttime instanceof DateTime )
+                if( trim( $item['startdate'] ) != '' )
                 {
-                    $tmpStarttime->setTime( 00, 00 );
+                    if( !isset( $item['starttime-hour'] ) || ( isset( $item['starttime-hour'] ) && $item['starttime-hour'] == '' ) )
+                        $item['starttime-hour'] = ' 00';
+                    if( $item['enddate'] == '' )
+                        $item['enddate'] = trim( $item['startdate'] );
+                    if( !isset( $item['endtime-hour'] ) || ( isset( $item['endtime-hour'] ) && $item['endtime-hour'] == '' ) )
+                        $item['endtime-hour'] = ' 00';
+                    $startTimeString = trim( $item['startdate'] ) . ' ' . trim( $item['starttime-hour'] );
+                    $tmpStarttime = eZPublishEvent::createDateTime( $startTimeString, $item, 'start' );
+                    if( $tmpStarttime instanceof DateTime )
+                    {
+                        $tmpStarttime->setTime( 00, 00 );
+                    }
+                    $endTimeString = trim( $item['enddate'] ) . ' ' . trim( $item['endtime-hour'] );
+                    $tmpEndtime = eZPublishEvent::createDateTime( $endTimeString, $item, 'end' );
+                    if( $tmpEndtime instanceof DateTime && $tmpStarttime instanceof DateTime )
+                    {
+                        $tmpEndtime->setTime( 00, 00 );
+                        $operatorValue = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
+                    }
                 }
-                $endTimeString = trim( $item['enddate'] ) . ' ' . trim( $item['endtime-hour'] );
-                $tmpEndtime = eZPublishEvent::createDateTime( $endTimeString, $item, 'end' );
-                if( $tmpEndtime instanceof DateTime )
-                {
-                    $tmpEndtime->setTime( 00, 00 );
-                    $operatorValue = ( $tmpEndtime->getTimestamp() - $tmpStarttime->getTimestamp() ) / 86400;
-                }
+                else
+                    $operatorValue = false;
                 break;
             case 'ezpevent_format_date':
                 if( isset( $namedParameters['startdate'] ) && isset( $namedParameters['enddate'] ) )

@@ -7,7 +7,7 @@
                         'starttimeHour', $item.starttime-hour,
                         'starttimeMinute', $item.starttime-minute )}
 {/if}
-{if is_set( $item.endtime )}
+{if and( is_set( $item.endtime ), $item.starttime|ne( '' ) )}
 {def $days = $item.endtime|sub( $item.starttime )|div( 86400 )|round()
      $endtime = hash( 'enddate', $item.endtime|datetime( 'custom', $dateFormat ),
                       'endtimeHour', $item.endtime|datetime( 'custom', '%H' ),
