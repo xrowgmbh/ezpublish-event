@@ -225,7 +225,20 @@ class eZPublishEventType extends eZDataType
                 }
                 if( $endtimestamp > $lastenddate || $lastenddate == 0 )
                 {
-                    $lastenddate = $endtimestamp;
+                    // if an one day event
+                    if( $enddate->format( 'H:i' ) == '00:00' )
+                    {
+                        $checkEndDate = clone $enddate;
+                        $checkEndDate->modify( '-1 day' );
+                        if( $startdate->format( 'd.m.Y' ) == $checkEndDate->format( 'd.m.Y' ) )
+                        {
+                            $lastenddate = $starttimestamp;
+                        }
+                    }
+                    else
+                    {
+                        $lastenddate = $endtimestamp;
+                    }
                     if( isset( $include[$key]['weekdays'] ) && count( $include[$key]['weekdays'] ) > 0 && count( $include[$key]['weekdays'] ) < 7 )
                     {
                         $endtimeTmp = clone $enddate;
