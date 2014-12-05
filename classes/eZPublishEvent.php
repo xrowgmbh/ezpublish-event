@@ -172,12 +172,25 @@ class eZPublishEvent
                     $excludeDays = array();
                     foreach( $ezpeventContent['json']['exclude'] as $ezpeventExcludeItem )
                     {
-                        for( $day = $ezpeventExcludeItem['starttime']; $day <= $ezpeventExcludeItem['endtime']; $day=$day+86400 )
+                      /* PHP Bug #63311 DateTime::add() adds wrong interval when switching from summer to winter time 
+                       * This method is currently unavailable!
+                       * $excludeStartDays= new DateTime($ezpeventExcludeItem['start'],);
+                        $excludeEndDays = new DateTime($ezpeventExcludeItem['end']);
+                        for( $day = $excludeStartDays; $day <= $excludeEndDays; $day=$day->add(new DateInterval('P1D')))
                         {
-                            $excludeDays[$day] = $day;
+                            $excludeItems= $day->format("Y-m-d");
+                            $excludeDays[$excludeItems] = $excludeItems;
+                        }*/
+                        $excludeDays_temp = self::checkSummertime($ezpeventExcludeItem['starttime'], $ezpeventExcludeItem['endtime']);
+                        for( $day = $excludeDays_temp["start"]; $day <= $excludeDays_temp["end"]; $day=$day+86400 )
+                        {
+                            $excludeItems=new DateTime();
+                            $excludeItems->setTimestamp($day);
+                            $excludeDays[$excludeItems->format("Y-m-d")] =$excludeItems->format("Y-m-d");
                         }
                     }
                 }
+                
                 if( isset( $ezpeventContent['json']['include'] ) )
                 {
                     foreach( $ezpeventContent['json']['include'] as $ezpeventItem )
@@ -185,15 +198,23 @@ class eZPublishEvent
                         $starttime = new DateTime();
                         $starttime->setTimestamp( $ezpeventItem['starttime'] );
                         $defaultData['attr_start_dt'] = $starttime->format( self::DATE_FORMAT_SOLR );
+                        
                         $start_time_temp=explode("T",$starttime->format( self::DATE_FORMAT_SOLR ));
                         $start_time = $start_time_temp[1];
-                        $start_0=$starttime->setTime(0,0);
-                        $start = $start_0->getTimestamp();
+                        
+                        $startimeItem=$starttime->format("Y-m-d");
+                        $start_temp = strtotime($startimeItem);
+                        
                         $endtime = new DateTime();
                         $endtime->setTimestamp( $ezpeventItem['endtime'] );
                         $defaultData['attr_end_dt'] = $endtime->format( self::DATE_FORMAT_SOLR );
-                        $end_0=$endtime->setTime(0,0);
-                        $end = $end_0->getTimestamp();
+                        
+                        $endtimeItem=$endtime->format("Y-m-d");
+                        $end_temp = strtotime($endtimeItem);
+                        
+                        $checkSummerTime=self::checkSummertime($start_temp, $end_temp);
+                        $start =$checkSummerTime["start"];
+                        $end = $checkSummerTime["end"];
                         // check all days
                         if(($end-$start)==86400 && $endtime->setTimestamp( $ezpeventItem['endtime'] )->format('H:i')=='00:00')
                         {
@@ -201,7 +222,7 @@ class eZPublishEvent
                         }
                         for( $day = $start; $day <= $end; $day = $day+86400 )
                         {
-                            if( !isset( $excludeDays ) || ( isset( $excludeDays ) && !array_key_exists( $day, $excludeDays ) ) )
+                            if( !isset( $excludeDays ) || ( isset( $excludeDays ) && !array_key_exists( date("Y-m-d",$day), $excludeDays ) ) )
                             {
                                 if( !isset( $ezpeventItem['weekdays'] ) || ( isset( $ezpeventItem['weekdays'] ) && in_array( date( 'D', $day ), $ezpeventItem['weekdays'] ) ) )
                                 {
@@ -470,5 +491,27 @@ class eZPublishEvent
             }
             self::checkWeekday( $dateTime, $weekdays, $index );
         }
+    }
+    
+    static function checkSummertime($start_Timestamp, $end_Timestamp)
+    {
+        $correctDays= array();
+        $startItem=Date("I",$start_Timestamp);
+        if($startItem)
+        {
+            $StartDays=$start_Timestamp+3600;
+        }else{
+            $StartDays=$start_Timestamp;
+        }
+    
+        $endItem=Date("I",$end_Timestamp);
+        if($endItem)
+        {
+            $EndDays=$end_Timestamp+3600;
+        }else{
+            $EndDays=$end_Timestamp;
+        }
+        $correctDays=["start"=>$StartDays,"end"=>$EndDays];
+        return  $correctDays;
     }
 }
