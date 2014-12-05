@@ -5,6 +5,7 @@ class eZPublishEvent
     const DATE_FORMAT = DateTime::ISO8601;
     const DATE_FORMAT_SOLR = 'Y-m-d\TH:i:s.000\Z';
     static private $currentDateFormat = null;
+    static private $dateInWeekDays = array();
     private $FindINI = null;
     private $eZPEventINI = null;
     private $FieldsForSOLRIndex = null;
@@ -444,7 +445,7 @@ class eZPublishEvent
         return false;
     }
     
-    static function checkWeekday( DateTime $dateTime, $weekdays, $index )
+    static function checkWeekday( DateTime $dateTime, $weekdays, $index, &$validDates = array() )
     {
         $weekday = $dateTime->format( 'D' );
         /*if($index == 'lastenddate')
@@ -459,6 +460,7 @@ class eZPublishEvent
         
         if( in_array( $weekday, $weekdays ) )
         {
+            $validDates[] = $weekday;
             /*if($index == 'lastenddate')
             {
                 var_dump('Im array');
@@ -468,6 +470,9 @@ class eZPublishEvent
         }
         else
         {
+            if( in_array( $weekday, $validDates ) )
+                return $dateTime;
+
             if( $index == 'firststartdate' )
             {
                 $dateTime->modify( '+1 day' );
