@@ -84,13 +84,25 @@ class eZPublishEventType extends eZDataType
                                                                 'end' => $endtime->format( eZPublishEvent::DATE_FORMAT ) );
                                         if( isset( $includeItem['weekdays'] ) && count( $includeItem['weekdays'] ) > 0 && count( $includeItem['weekdays'] ) < 7 )
                                         {
-                                            $weekdayShortNames = $ezpublisheventIni->variable( 'Settings', 'WeekdayShortNames' );
-                                            $weekdays = array();
-                                            foreach( $includeItem['weekdays'] as $index => $weekday )
+                                            $endtimeCW = clone $endtime;
+                                            $starttimeCW = clone $starttime;
+                                            $endtimeCW->setTime(00, 00, 00);
+                                            $starttimeCW->setTime(00, 00, 00);
+                                            $betweenDays = $endtimeCW->diff( $starttimeCW );
+                                            if( $betweenDays->format( '%a' ) >= 3 )
                                             {
-                                                $weekdays[] = $weekdayShortNames[$index];
+                                                $weekdayShortNames = $ezpublisheventIni->variable( 'Settings', 'WeekdayShortNames' );
+                                                $weekdays = array();
+                                                foreach( $includeItem['weekdays'] as $index => $weekday )
+                                                {
+                                                    $weekdays[] = $weekdayShortNames[$index];
+                                                }
+                                                $include[$key]['weekdays'] = $weekdays;
                                             }
-                                            $include[$key]['weekdays'] = $weekdays;
+                                            else
+                                            {
+                                                unset( $include[$key]['weekdays'] );
+                                            }
                                         }
                                     }
                                 }
