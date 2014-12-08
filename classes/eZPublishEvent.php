@@ -511,7 +511,7 @@ class eZPublishEvent
         }else{
             $EndDays=$end_Timestamp;
         }
-        $correctDays=["start"=>$StartDays,"end"=>$EndDays];
+        $correctDays=array("start"=>$StartDays,"end"=>$EndDays);
         return  $correctDays;
     }
 }
