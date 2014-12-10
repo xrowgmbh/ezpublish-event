@@ -246,6 +246,10 @@ class eZPublishEventType extends eZDataType
                         {
                             $lastenddate = $starttimestamp;
                         }
+                        else
+                        {
+                            $lastenddate = $endtimestamp;
+                        }
                     }
                     else
                     {
