@@ -8,8 +8,17 @@ class eZPublishEventSearch
         if($ezpublishevent_ini->hasVariable( 'Settings', 'EventClassIdentifier' ))
         {
             $classidentifier = $ezpublishevent_ini->variable( 'Settings', 'EventClassIdentifier' );
-            if ($object->ClassIdentifier == $classidentifier && $object->Status == 1)
+            $checkHidde=$object->mainNode()->IsInvisible;
+            if($checkHidde == 1)
             {
+                $client = eZPublishSolarium::createSolariumClient();
+                $update = $client->createUpdate();
+                $update->addDeleteQuery('meta_id_si:' . $object->ID);
+                $update->addCommit();
+                $deleteResult = $client->update($update);
+            }
+            if ($object->ClassIdentifier == $classidentifier && $object->Status == 1 && $checkHidde == 0)
+            {   
                 $client = eZPublishSolarium::createSolariumClient();
                 $query = $client->createSelect();
                 $update = $client->createUpdate();
