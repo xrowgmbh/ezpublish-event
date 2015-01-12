@@ -129,6 +129,33 @@ jQuery(document).ready(function() {
         });
     }
     
+     /*date input field optimization*/
+    $("input.event_datefield_from, input.event_datefield_to").change(function() {
+
+        var todaytemp1=$.datejava(new Date().getTime());
+
+        if( $(".event_datefield_from").val() == "")
+        {
+           if($(".event_datefield_to").val() != "")
+           {
+               var endtemp1=$(".event_datefield_to").val();
+               $(".event_datefield_from").val(endtemp1);
+           }else{
+               $(".event_datefield_from").val(this.todaytemp1);
+           }
+        }
+        if($(".event_datefield_to").val() == "")
+        {
+           if($(".event_datefield_from").val() != "")
+           {
+               var starttemp1=$(".event_datefield_from").val();
+               $(".event_datefield_to").val(starttemp1);
+           }else{
+               $(".event_datefield_to").val(this.todaytemp1);
+           }
+        }
+    });
+    
     //for event search
     $.date = function(dateObject) {
         var d = new Date(dateObject * 1000);
