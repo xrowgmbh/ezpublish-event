@@ -14,7 +14,15 @@ if ( $http->hasVariable( 'fromDate' ) )
         $startDate_parts = explode('.',$startDate);
         $startDateTs=strtotime($startDate_parts[2]."-".$startDate_parts[1]."-".$startDate_parts[0])+date("Z");
     }else{
-        $startDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
+        if($http->variable( 'toDate' ) !=="")
+        {
+            $startDate = $http->variable( 'toDate' );
+            $startDate_parts = explode('.',$startDate);
+            $startDateTs=strtotime($startDate_parts[2]."-".$startDate_parts[1]."-".$startDate_parts[0])+date("Z");
+        }else
+        {
+            $startDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
+        }
     }
 }else{
     $startDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
@@ -28,7 +36,15 @@ if ( $http->hasVariable( 'toDate' ) )
         $endDate_parts = explode('.',$endDate);
         $endDateTs=strtotime($endDate_parts[2]."-".$endDate_parts[1]."-".$endDate_parts[0])+date("Z");
     }else{
-        $endDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
+        if($http->variable( 'fromDate' ) !=="")
+        {
+            $endDate = $http->variable( 'fromDate' );
+            $endDate_parts = explode('.',$endDate);
+            $endDateTs=strtotime($endDate_parts[2]."-".$endDate_parts[1]."-".$endDate_parts[0])+date("Z");
+        }else
+        {
+            $endDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
+        }
     }
 }else{
     $endDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
