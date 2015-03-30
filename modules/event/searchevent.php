@@ -12,20 +12,20 @@ if ( $http->hasVariable( 'fromDate' ) )
     {
         $startDate = $http->variable( 'fromDate' );
         $startDate_parts = explode('.',$startDate);
-        $startDateTs=strtotime($startDate_parts[2]."-".$startDate_parts[1]."-".$startDate_parts[0])+date("Z");
+        $startDateTs=$startDate_parts[2]."-".$startDate_parts[1]."-".$startDate_parts[0]."T00:00:00Z";
     }else{
         if($http->variable( 'toDate' ) !=="")
         {
             $startDate = $http->variable( 'toDate' );
             $startDate_parts = explode('.',$startDate);
-            $startDateTs=strtotime($startDate_parts[2]."-".$startDate_parts[1]."-".$startDate_parts[0])+date("Z");
+            $startDateTs=$startDate_parts[2]."-".$startDate_parts[1]."-".$startDate_parts[0]."T00:00:00Z";
         }else
         {
-            $startDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
+            $startDateTs=date("Y-m-d",$heute)."T00:00:00Z";
         }
     }
 }else{
-    $startDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
+    $startDateTs=date("Y-m-d",$heute)."T00:00:00Z";
 }
 
 if ( $http->hasVariable( 'toDate' ) )
@@ -34,36 +34,20 @@ if ( $http->hasVariable( 'toDate' ) )
     {
         $endDate = $http->variable( 'toDate' );
         $endDate_parts = explode('.',$endDate);
-        $endDateTs=strtotime($endDate_parts[2]."-".$endDate_parts[1]."-".$endDate_parts[0])+date("Z");
+        $endDateTs= $endDate_parts[2]."-".$endDate_parts[1]."-".$endDate_parts[0]."T00:00:00Z";
     }else{
         if($http->variable( 'fromDate' ) !=="")
         {
             $endDate = $http->variable( 'fromDate' );
             $endDate_parts = explode('.',$endDate);
-            $endDateTs=strtotime($endDate_parts[2]."-".$endDate_parts[1]."-".$endDate_parts[0])+date("Z");
+            $endDateTs= $endDate_parts[2]."-".$endDate_parts[1]."-".$endDate_parts[0]."T00:00:00Z";
         }else
         {
-            $endDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
+            $endDateTs=date("Y-m-d",$heute)."T00:00:00Z";
         }
     }
 }else{
-    $endDateTs=strtotime(date("Y-m-d",$heute))+date("Z");
-}
-
-$startSommerItem=Date("I",$startDateTs);
-if($startSommerItem)
-{
-    $StartDays=$startDateTs+3600;
-}else{
-    $StartDays=$startDateTs;
-}
-
-$endSommerItem=Date("I",$endDateTs);
-if($endSommerItem)
-{
-    $EndDays=$endDateTs+3600;
-}else{
-    $EndDays=$endDateTs;
+    $endDateTs=date("Y-m-d",$heute)."T00:00:00Z";
 }
 
 if( $http->hasVariable('SearchText'))
@@ -134,9 +118,7 @@ $query = $client->createSelect();
 if($sort_type == "event/date")
 {
     $helper = $query->getHelper();
-    $start_date= gmdate('Y-m-d\TH:i:s\Z',$StartDays);
-    $end_date= gmdate('Y-m-d\TH:i:s\Z',$EndDays);
-    $query_string='attr_currentday_dt:['.$start_date.' TO '.$end_date.']'.
+    $query_string='attr_currentday_dt:['.$startDateTs.' TO '.$endDateTs.']'.
                   ' AND '.$helper->escapePhrase($search_text).
                   ' AND '.'meta_path_si:'.'"'.$SubTreeArray.'"'.
                   ' AND '.'attr_xrowgis_s:'.$event_city.
@@ -179,9 +161,7 @@ if($sort_type == "event/date")
     $helper = $query->getHelper();
     $template_array=array();
     $last_array=array();
-    $start_date= gmdate('Y-m-d\TH:i:s\Z',$StartDays);
-    $end_date= gmdate('Y-m-d\TH:i:s\Z',$EndDays);
-    $query_string='attr_currentday_dt:['.$start_date.' TO '.$end_date.']'.
+    $query_string='attr_currentday_dt:['.$startDateTs.' TO '.$endDateTs.']'.
                   ' AND '.$helper->escapePhrase($search_text).
                   ' AND '.'meta_path_si:'.'"'.$SubTreeArray.'"'.
                   ' AND '.'attr_xrowgis_s:'.$event_city.
