@@ -43,7 +43,7 @@ if ( $http->hasVariable( 'toDate' ) )
             $endDateTs= $endDate_parts[2]."-".$endDate_parts[1]."-".$endDate_parts[0]."T00:00:00Z";
         }else
         {
-            $endDateTs=date("Y-m-d",$heute)."T00:00:00Z";
+           $endDateTs=date("Y-m-d",$heute)."T00:00:00Z";
         }
     }
 }else{
