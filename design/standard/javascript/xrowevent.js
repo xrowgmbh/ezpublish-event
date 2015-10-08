@@ -327,7 +327,7 @@ jQuery(document).ready(function() {
         });
     }
     
-    $("#contenteventsearch .searchtext").live("keydown",function(e){
+    $("#contenteventsearch .searchtext").on("keydown",function(e){
         if(e.keyCode==13)
         { 
             var sorttype ='';
