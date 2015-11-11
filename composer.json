@@ -11,7 +11,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "ezsystems/ezpublish-legacy-installer": "*"
+        "ezsystems/ezpublish-legacy-installer": "*",
+        "solarium/solarium": "3.4.1"
     },
     "extra": {
         "ezpublish-legacy-extension-name": "ezpublish-event"
