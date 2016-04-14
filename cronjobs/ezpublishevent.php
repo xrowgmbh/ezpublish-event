@@ -72,4 +72,3 @@ catch( Solarium_Exception $e )
 
 eZUser::logoutCurrent();
 $cli->output( "READY!" );
-$script->shutdown();
