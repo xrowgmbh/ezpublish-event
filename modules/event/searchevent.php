@@ -148,7 +148,10 @@ if($sort_type == "event/date")
             $single_key=5;
         }
         $compare=$date_temp[0];
-        $object=eZContentObject::fetch( $document["meta_id_si"] );
+        $object = eZContentObject::fetch( $document["meta_id_si"] );
+        if ( $object === null ){
+            continue;
+        }
         $obj_datamap=$object->dataMap();
         if(!empty($obj_datamap) && $object->canRead())
         {
