@@ -78,7 +78,7 @@ class eZPublishEventSearch
         $result = $client->update($update);
     }
 
-    public static function clean($optimize)
+    public static function clean()
     {
         $client = eZPublishSolarium::createSolariumClient();
         $update = $client->createUpdate();

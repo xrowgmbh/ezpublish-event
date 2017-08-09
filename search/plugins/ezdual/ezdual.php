@@ -57,7 +57,7 @@ class eZDual extends eZSolr
     **/
     function cleanup( $allInstallations = false, $optimize = false )
     {
-       eZPublishEventSearch::clean( $optimize );
+       eZPublishEventSearch::clean();
        return parent::cleanup( $allInstallations, $optimize );
     }
 }
