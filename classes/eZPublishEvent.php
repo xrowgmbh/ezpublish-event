@@ -255,6 +255,10 @@ class eZPublishEvent
                                 break;
                             }
                         }
+                        if($connectedDates === "1")
+                        {
+                            break;
+                        }
                     }
                 }
                 if( count( $docList ) > 0 )
