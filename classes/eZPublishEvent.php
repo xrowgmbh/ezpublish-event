@@ -133,6 +133,7 @@ class eZPublishEvent
                                 $ident = 'attr_keywords____k';
                                 $content = $attribute->content();
                                 $metaData = $content->keywords;
+                                $defaultData['subattr_metadata___sitemap_use____t'] = $content->sitemap_use;
                                 break;
                             break;
                             case 'ezxmltext':

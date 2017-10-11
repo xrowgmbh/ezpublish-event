@@ -123,7 +123,8 @@ if($sort_type == "event/date")
                   ' AND '.'meta_path_si:'.'"'.$SubTreeArray.'"'.
                   ' AND '.'attr_xrowgis_s:'.$event_city.
                   ' AND '.'attr_long_date_b:'.$long_event.
-                  ' AND '.'attr_prices_t:'.$free_event;
+                  ' AND '.'attr_prices_t:'.$free_event.
+                  ' AND '.'-subattr_metadata___sitemap_use____t:"0"';
     $query->setQuery($query_string);
     
     $query->setStart($Offset)->setRows($limit);
@@ -169,7 +170,8 @@ if($sort_type == "event/date")
                   ' AND '.'meta_path_si:'.'"'.$SubTreeArray.'"'.
                   ' AND '.'attr_xrowgis_s:'.$event_city.
                   ' AND '.'attr_long_date_b:'.$long_event.
-                  ' AND '.'attr_prices_t:'.$free_event;
+                  ' AND '.'attr_prices_t:'.$free_event.
+                  ' AND '.'-subattr_metadata___sitemap_use____t:"0"';
     $query->setQuery($query_string);
     $query->setStart($Offset)->setRows($limit);
     $query->addSorts('score', Solarium_Query_Select::SORT_ASC,'attr_currentday_dt', Solarium_Query_Select::SORT_ASC);
