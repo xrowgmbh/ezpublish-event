@@ -39,7 +39,7 @@ class eZDual extends eZSolr
 
     /**
      * Removes object $contentObject from the search database.
-     *
+     * @deprecated Since 5.0, use removeObjectById()
      * @param eZContentObject $contentObject the content object to remove
      * @param bool $commit Whether to commit after removing the object
      * @return bool True if the operation succeed.
@@ -50,6 +50,21 @@ class eZDual extends eZSolr
         return parent::removeObject( $contentObject, $commit );
     }
 
+    /**
+     * Removes a content object by Id from the search database.
+     *
+     * @since 5.0
+     * @param int $contentObjectId The content object to remove by id
+     * @param bool $commit Whether to commit after removing the object
+     * @return bool True if the operation succeed.
+     */
+    function removeObjectById( $contentObjectId, $commit = null )
+    {
+        $contentObject = eZContentObject::fetch( $contentObjectId);
+        eZPublishEventSearch::delete( $contentObject, $commit );
+        return parent::removeObjectById( $contentObjectId, $commit );
+    }
+    
     /**
      * Clean up search index for current installation.
      * @return bool true if cleanup was successful
