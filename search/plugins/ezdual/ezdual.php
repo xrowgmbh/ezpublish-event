@@ -60,10 +60,10 @@ class eZDual extends eZSolr
      */
     function removeObjectById( $contentObjectId, $commit = null )
     {
-        $contentObject = eZContentObject::fetch( $contentObjectId);
-        eZPublishEventSearch::delete( $contentObject, $commit );
+        eZPublishEventSearch::delete( $contentObjectId, $commit );
         return parent::removeObjectById( $contentObjectId, $commit );
     }
+
     
     /**
      * Clean up search index for current installation.

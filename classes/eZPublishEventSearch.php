@@ -47,28 +47,21 @@ class eZPublishEventSearch
         }
     }
 
-    public static function delete(eZContentObject $object, $commit = true)
+    public static function delete($contentObjectId, $commit = true)
     {
-        $ezpublishevent_ini = eZINI::instance( 'ezpublishevent.ini' );
-        if($ezpublishevent_ini->hasVariable( 'Settings', 'EventClassIdentifier' ))
+        $client = eZPublishSolarium::createSolariumClient();
+        $query = $client->createSelect();
+        $query->setQuery('meta_id_si:' . $contentObjectId);
+        $resulttest = $client->select($query);
+        if ($resulttest->getNumFound() != 0)
         {
-            $classidentifier = $ezpublishevent_ini->variable( 'Settings', 'EventClassIdentifier' );
-            if ($object->ClassIdentifier == $classidentifier)
-            {
-                $client = eZPublishSolarium::createSolariumClient();
-                $query = $client->createSelect();
-                $query->setQuery('meta_id_si:' . $object->ID);
-                $resulttest = $client->select($query);
-                if ($resulttest->getNumFound() != 0)
-                {
-                    $update = $client->createUpdate();
-                    $update->addDeleteQuery('meta_id_si:' . $object->ID);
-                    $update->addCommit();
-                    $deleteResult = $client->update($update);
-                }
-            }
+            $update = $client->createUpdate();
+            $update->addDeleteQuery('meta_id_si:' . $contentObjectId);
+            $update->addCommit();
+            $deleteResult = $client->update($update);
         }
     }
+
 
     public static function commit()
     {
