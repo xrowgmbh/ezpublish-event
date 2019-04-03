@@ -13,7 +13,7 @@ class eZDual extends eZSolr
               If set, run optimize() as well every 1000nd time this function is run.
      * @return bool True if the operation succeed.
      */
-    function addObject( $contentObject, $commit = true )
+    function addObject( $contentObject, $commit = true , $commitWithin = 0, $softCommit = NULL)
     {
         eZPublishEventSearch::update( $contentObject, $commit );
         return parent::addObject( $contentObject, $commit );
@@ -22,7 +22,7 @@ class eZDual extends eZSolr
     /**
      * Performs a solr COMMIT
      */
-    function commit()
+    function commit($softCommit = false)
     {
         eZPublishEventSearch::commit();
         parent::commit();
@@ -44,7 +44,7 @@ class eZDual extends eZSolr
      * @param bool $commit Whether to commit after removing the object
      * @return bool True if the operation succeed.
      */
-    function removeObject( $contentObject, $commit = null )
+    function removeObject( $contentObject, $commit = null ,$commitWithin = 0)
     {
         eZPublishEventSearch::delete( $contentObject, $commit );
         return parent::removeObject( $contentObject, $commit );
@@ -58,7 +58,7 @@ class eZDual extends eZSolr
      * @param bool $commit Whether to commit after removing the object
      * @return bool True if the operation succeed.
      */
-    function removeObjectById( $contentObjectId, $commit = null )
+    function removeObjectById( $contentObjectId, $commit = NULL, $commitWithin = 0, ?array $languages = NULL )
     {
         eZPublishEventSearch::delete( $contentObjectId, $commit );
         return parent::removeObjectById( $contentObjectId, $commit );
