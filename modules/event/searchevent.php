@@ -57,9 +57,13 @@ if( $http->hasVariable('SearchText'))
     $search_text = "*";
 }
 
-if( $http->hasVariable('event_city'))
+if( $http->hasVariable('event_city') && $http->variable('event_city') != "")
 {
     $event_city = '"' . $http->variable('event_city') . '"';
+}
+else
+{
+    $event_city ="*";
 }
 
 if( $http->hasvariable( 'SubTreeArray' ) )
@@ -91,10 +95,6 @@ if($free_event == 1){
     $free_event ="1";
 }elseif(!isset($free_event) || $free_event == ''){
     $free_event ="*";
-}
-
-if(!isset($event_city) || $event_city == ''){
-    $event_city ="*";
 }
 
 if( $http->hasVariable('sort_type'))
