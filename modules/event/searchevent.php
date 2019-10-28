@@ -59,7 +59,7 @@ if( $http->hasVariable('SearchText'))
 
 if( $http->hasVariable('event_city'))
 {
-    $event_city = $http->variable('event_city');
+    $event_city = '"' . $http->variable('event_city') . '"';
 }
 
 if( $http->hasvariable( 'SubTreeArray' ) )
@@ -121,7 +121,7 @@ if($sort_type == "event/date")
     $query_string='attr_currentday_dt:['.$startDateTs.' TO '.$endDateTs.']'.
                   ' AND '.$helper->escapePhrase($search_text).
                   ' AND '.'meta_path_si:'.'"'.$SubTreeArray.'"'.
-                  ' AND '.'attr_xrowgis_s:'.'"'.$event_city.'"'.
+                  ' AND '.'attr_xrowgis_s:'.$event_city.
                   ' AND '.'attr_long_date_b:'.$long_event.
                   ' AND '.'attr_prices_t:'.$free_event.
                   ' AND '.'-subattr_metadata___sitemap_use____t:"0"';
@@ -168,7 +168,7 @@ if($sort_type == "event/date")
     $query_string='attr_currentday_dt:['.$startDateTs.' TO '.$endDateTs.']'.
                   ' AND '.$helper->escapePhrase($search_text).
                   ' AND '.'meta_path_si:'.'"'.$SubTreeArray.'"'.
-                  ' AND '.'attr_xrowgis_s:'.'"'.$event_city.'"'.
+                  ' AND '.'attr_xrowgis_s:'.$event_city.
                   ' AND '.'attr_long_date_b:'.$long_event.
                   ' AND '.'attr_prices_t:'.$free_event.
                   ' AND '.'-subattr_metadata___sitemap_use____t:"0"';
