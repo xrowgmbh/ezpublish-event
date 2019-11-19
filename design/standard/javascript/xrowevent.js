@@ -839,17 +839,55 @@ var removePeriod = function(element, div, findPrefix, addButton, removeButtonID)
     if(typeof $('#'+div+'_'+next_index) !== 'undefined' && $('#'+div+'_'+next_index).length) {
         for(i = next_index; i <= allDivsCounter ; i++) {
             if(typeof $('#'+div+'_'+i) !== 'undefined' && $('#'+div+'_'+i).length) {
+                holdInputValue(i, findPrefix);
                 var content = $('#'+div+'_'+i).html();
                 content = replaceIndex(content, findPrefix, element, i, (i-1));
                 if(content) {
                     $('#'+div+'_'+i).remove();
                     $('<div id='+div+'_'+(i-1)+'>'+content+'</div>').insertAfter('#'+div+'_'+(i-2));
-                    initializeDefault((i-1), findPrefix, addButton, div, removeButtonID);
+                    initializeRemoveDefault((i-1), findPrefix, addButton, div, removeButtonID);
                 }
             }
         }
     }
 };
+
+var holdInputValue = function(index, findPrefix) {
+    if(findPrefix == 'exclude') {
+        $('#startdateexclude_'+index).attr('value',$('#startdateexclude_'+index).val());
+        $('#enddateexclude_'+index).attr('value',$('#enddateexclude_'+index).val());
+    } else if (findPrefix == 'include') {
+        $('#startdate_'+index).attr('value',$('#startdate_'+index).val());
+        $('#enddate_'+index).attr('value',$('#enddate_'+index).val());
+        $('#ezpeventperiod_'+index+' .labelstarttime input').each(function() {
+            $(this).attr('value',$(this).val());
+        });
+        $('#ezpeventperiod_'+index+' .labelendtime input').each(function() {
+            $(this).attr('value',$(this).val());
+        });
+        $('#ezpeventperiodweekdays_'+index+' input[type="checkbox"]').each(function() {
+            if($(this).is(':checked')) {
+                $(this).prop('checked',true);
+            } else {
+                $(this).removeAttr('checked');
+            }
+        });
+    }
+};
+
+var initializeRemoveDefault = function(index, findPrefix, element, div, removeButtonID) {
+    // initilize datepicker
+    $('#'+div+'_'+index+' .ezpublisheventdate').each(function(){
+        initDate($(this));
+    });
+    // set event for remove selected include period
+    $('#'+removeButtonID+'_'+index).show();
+    $('#'+removeButtonID+'_'+index).on( 'click', function(event){
+        event.preventDefault();
+        removePeriod($(this), div, findPrefix, element, removeButtonID);
+    });
+};
+
 var initializeDefault = function(index, findPrefix, element, div, removeButtonID) {
     if(findPrefix == 'include')
         activeAllCheckboxes(index);
